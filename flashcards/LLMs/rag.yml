@@ -1,0 +1,247 @@
+subject: RAG (Retrieval-Augmented Generation)
+description: In-depth concepts for building and evaluating RAG systems.
+cards:
+  - front: |
+      # What is the primary purpose of using a **RAG system**?
+    back: |
+      The main goal is to **ground Large Language Model responses in external, verifiable knowledge**.
+
+      This helps to significantly:
+      - Reduce **hallucinations** and factual errors.
+      - Allow the model to use **up-to-date** or **domain-specific** information without being retrained.
+
+  - front: |
+      # What are the four main steps in a standard **RAG pipeline**?
+    back: |
+      The pipeline consists of four sequential steps:
+
+      1.  **Query**: The user asks a question or provides a prompt.
+      2.  **Retrieve**: Relevant documents are fetched from an external knowledge base.
+      3.  **Augment**: The retrieved context is combined with the original query to create an augmented prompt.
+      4.  **Generate**: The LLM creates an answer based on this augmented prompt.
+
+  - front: |
+      # What is **Dense Retrieval** and how does it work?
+    back: |
+      Dense Retrieval finds documents based on **semantic meaning**, not just keywords.
+
+      ## How it works:
+      1. It uses **embedding models** (like Sentence-BERT) to convert both the query and all document chunks into numerical vectors.
+      2. It then searches for the document vectors that are closest to the query vector in a high-dimensional space.
+      3. Proximity is often measured using **cosine similarity**.
+
+  - front: |
+      # What are the main **pros and cons** of **Dense Retrieval**?
+    back: |
+      ## Pros:
+      - **Deep semantic understanding**: Can find relevant information even if the wording is completely different.
+      - **Handles paraphrasing and synonyms** effectively.
+
+      ## Cons:
+      - **Computationally expensive**: Requires powerful models and vector databases.
+      - **May miss exact keyword matches** that sparse retrieval would easily find.
+
+  - front: |
+      # What is **Sparse Retrieval** and what are its common methods?
+    back: |
+      Sparse Retrieval is a traditional information retrieval method that relies on **exact keyword matching**.
+
+      It represents documents using sparse vectors (where most values are zero), which track the presence and frequency of words.
+
+      ### Common Methods:
+      - **BM25**: A popular ranking function that scores documents based on term frequency and inverse document frequency.
+      - **TF-IDF**: A simpler statistical measure used to evaluate a word's importance to a document in a collection.
+
+  - front: |
+      # What are the main **pros and cons** of **Sparse Retrieval**?
+    back: |
+      ## Pros:
+      - **Fast and efficient**.
+      - **Excellent at exact keyword matching**.
+      - **Explainable results**: It is clear why a document was retrieved.
+
+      ## Cons:
+      - **No semantic understanding**: It cannot grasp the meaning or context behind words.
+      - **Sensitive to vocabulary mismatch**: Fails if the query uses different words than the document for the same concept.
+
+  - front: |
+      # What is **Hybrid Retrieval** in RAG?
+    back: |
+      Hybrid Retrieval **combines the strengths of both sparse and dense methods** to achieve superior results.
+
+      A typical approach involves:
+      1. Running a keyword-based search (BM25) and a vector search in parallel.
+      2. Merging the results using a technique like **Reciprocal Rank Fusion (RRF)** to create a more robust final ranking.
+
+  - front: |
+      # Why is **document chunking** a critical step in RAG?
+    back: |
+      Chunking involves breaking down large documents into smaller, manageable pieces. This is critical for several reasons:
+
+      - **LLM Context Window**: LLMs have a limited context window, and feeding a whole document is inefficient or impossible.
+      - **Retrieval Precision**: Smaller chunks allow the retriever to find more specific and relevant passages, improving the signal-to-noise ratio.
+
+  - front: |
+      # What are some common **chunking strategies**?
+    back: |
+      - **Fixed-size**: Simple, but can awkwardly split semantic units like sentences or paragraphs.
+      - **Sentence/Paragraph**: Preserves meaning by splitting along natural boundaries, but results in variable chunk sizes.
+      - **Recursive**: Splits text hierarchically, first by sections, then paragraphs, then sentences, to maintain structure.
+      - **Semantic**: Groups sentences based on topic coherence using embedding similarity.
+
+  - front: |
+      # What is the purpose of using **chunk overlap**?
+    back: |
+      Chunk overlap involves including a small amount of text from the end of the previous chunk at the beginning of the next one (e.g., 20-50 tokens).
+
+      Its purpose is to **ensure that semantic context is not lost** for sentences or ideas that are split across two chunks. This helps the model understand the full context of a passage that might start at the end of one chunk and finish at the beginning of the next.
+
+  - front: |
+      # What is **Query Transformation** in advanced RAG?
+    back: |
+      Query Transformation is a technique to modify or expand the user's initial query to improve retrieval results. The goal is to bridge the gap between how a user asks a question and how the information is stored.
+
+      ### Common Methods:
+      - **Query Rewriting**: Rephrase the query for better clarity.
+      - **Query Expansion**: Generate multiple related queries to retrieve a broader set of documents.
+      - **Query Decomposition**: Break a complex query into simpler sub-queries.
+
+  - front: |
+      # What is **Hypothetical Document Embeddings (HyDE)**?
+    back: |
+      HyDE is an advanced query transformation technique with a clever workflow:
+
+      1. **Generate**: An LLM generates a *hypothetical* answer to the user's question. This answer is concise and contains likely facts.
+      2. **Embed**: An embedding is created for this hypothetical answer.
+      3. **Retrieve**: This new embedding is used to search the vector database.
+
+      This often works better than embedding the raw query because the hypothetical answer's embedding is closer in the vector space to the actual answer documents.
+
+  - front: |
+      # How does a **re-ranking** step improve retrieval?
+    back: |
+      Re-ranking adds a second, more precise stage to the retrieval process.
+
+      1. **Initial Retrieval**: A fast but less precise retriever (like vector search or BM25) fetches a large set of candidate documents (e.g., top 100).
+      2. **Re-ranking**: A more powerful but slower model, like a **cross-encoder**, re-evaluates and re-ranks only these candidates to find the absolute best matches to pass to the LLM.
+
+  - front: |
+      # What is **Maximal Marginal Relevance (MMR)** used for?
+    back: |
+      MMR is a re-ranking algorithm that aims to **diversify the retrieved results**.
+
+      In addition to finding documents relevant to the query, it also works to **reduce redundancy** by penalizing documents that are too similar to ones that have already been selected. This is useful for providing a broader context on a topic.
+
+  - front: |
+      # How do you evaluate the **retrieval component** of a RAG system?
+    back: |
+      Retrieval quality is measured using classic information retrieval metrics:
+
+      - `Precision@K`: Of the top K retrieved documents, how many are relevant?
+      - `Recall@K`: Of all the relevant documents in the dataset, how many did we find in the top K?
+      - `Mean Reciprocal Rank (MRR)`: Measures the rank of the *first* correct answer. Useful when only one good answer is needed.
+
+  - front: |
+      # How do you evaluate the **generation component** of a RAG system?
+    back: |
+      Generation quality is measured by assessing the final output:
+
+      - **Faithfulness**: Is the response factually supported by the provided context? It measures how well the LLM stuck to the source documents.
+      - **Answer Relevance**: Does the response actually and fully address the user's original query?
+
+  - front: |
+      # What is the **RAGAS framework**?
+    back: |
+      RAGAS is a popular open-source framework for the **end-to-end evaluation of RAG systems**.
+
+      It provides a suite of metrics to assess the system's performance across different dimensions, including the effectiveness of both the retrieval and generation components, often *without* relying on human-annotated ground truth labels.
+
+  - front: |
+      # Summarize the **general RAG data workflow**.
+    back: |
+      The workflow is a linear pipeline to ground LLM responses:
+
+      ```
+      User Query → Retriever → Vector Database → Document Chunks → Augment Prompt → LLM → Generate Response
+      ```
+  - front: |
+      # Summarize the **core advantage of RAG**.
+    back: |
+      RAG's core advantage is its ability to provide LLMs with **external, up-to-date, and verifiable information at inference time**. This dramatically reduces factual errors and hallucinations without requiring costly and time-consuming model retraining.
+
+  - front: |
+      # Summarize the **role of Retrieval in RAG**.
+    back: |
+      The Retrieval step is the mechanism to find the **most contextually relevant document chunks** from a vast knowledge base. It acts as the bridge that connects the LLM's general, pre-trained knowledge to specific, external facts, typically relying on vector embeddings for semantic search.
+
+  - front: |
+      # Summarize the **role of Chunking in RAG**.
+    back: |
+      Chunking is the essential pre-processing step that **breaks large documents into optimal-sized pieces**. It ensures that the LLM's context window is used efficiently and that the Retriever can find precise, semantically coherent passages instead of overwhelming the model with irrelevant text.
+
+  - front: |
+      # Compare the pros of **RAG vs. Fine-Tuning** an LLM.
+    back: |
+      | Feature | RAG | Fine-Tuning |
+      |---|---|---|
+      | **Knowledge Update** | **Fast & cheap**. Just update the database. | **Slow & expensive**. Requires full retraining. |
+      | **Fact Grounding** | **Excellent**. Can cite sources directly. | **Poor**. Can't cite sources; knowledge is static. |
+      | **Hallucinations** | **Reduced** by grounding in facts. | **Can't prevent**; may increase domain errors. |
+      | **Implementation** | Relatively simple to set up. | Complex and data-intensive. |
+
+  - front: |
+      # Compare the cons of **RAG vs. Fine-Tuning** an LLM.
+    back: |
+      | Feature | RAG | Fine-Tuning |
+      |---|---|---|
+      | **Task Adaptation** | **Poor**. Doesn't teach the model new skills or styles. | **Excellent**. Adapts model's core behavior, tone, style. |
+      | **Latency** | **Adds latency** due to the retrieval step. | **No added latency** at inference time. |
+      | **Failure Mode** | "Garbage in, garbage out." Fails if retrieval is bad. | Fails if the fine-tuning data is low quality. |
+      | **Implicit Knowledge**| Cannot instill implicit knowledge. | Can teach the model nuanced, implicit concepts. |
+
+  - front: |
+      # What is **Few-Shot Prompting** and why is it effective?
+    back: |
+      Few-Shot Prompting involves providing the LLM with a **few examples of the desired input-output behavior** within the prompt itself, before posing the final query.
+
+      This is effective because it helps the model **infer the task format, constraints, and pattern** (a form of in-context learning), leading to higher-quality, more consistent output without needing to update model weights.
+
+  - front: |
+      # What is **Zero-Shot Prompting**?
+    back: |
+      Zero-Shot Prompting is the simplest form of prompting, where the LLM is given **only the instruction and the query**, with no examples.
+
+      It relies solely on the model's pre-trained knowledge and general instruction-following abilities to perform the task correctly.
+
+  - front: |
+      # What is **Chain-of-Thought (CoT) Prompting** and why is it useful?
+    back: |
+      CoT Prompting instructs the LLM to **explicitly articulate its reasoning process step-by-step** before arriving at the final answer.
+      
+      *Example*: Add "Let's think step by step." to the prompt.
+
+      This is useful because it transforms a complex problem into a sequence of intermediate, manageable steps. This dramatically improves performance on multi-step reasoning tasks (like math or logic problems) by allowing the model to "think" before answering.
+
+  - front: |
+      # What is **Self-Consistency** in advanced prompting?
+    back: |
+      Self-Consistency is a technique that improves upon Chain-of-Thought. It works by:
+
+      1. Generating **multiple different Chain-of-Thought paths** for the same query (e.g., by increasing the temperature).
+      2. Taking a **majority vote** on the final answers from all the generated reasoning paths.
+
+      This leads to a more robust and reliable final output, as it is less likely that a single flawed reasoning path will produce the final answer.
+
+  - front: |
+      # What is the **Instruction Tuning** technique?
+    back: |
+      Instruction Tuning is a type of **fine-tuning** where a pre-trained LLM is further trained on a dataset of task instructions paired with their correct outputs.
+
+      The goal is to significantly improve the model's ability to **follow and generalize from natural language instructions**, making it much more effective at zero-shot and few-shot prompting on unseen tasks.
+
+  - front: |
+      # What is a **System Prompt** (or Meta Prompt)?
+    back: |
+      A System Prompt is a set of high-level instructions placed at the very beginning of a conversation, often in a dedicated `system` role.
+
+      Its purpose is to establish the LLM's **persona, constraints, rules, and desired behavior** for the entire interaction. It helps steer the model's overall style, tone, and function for better consistency.

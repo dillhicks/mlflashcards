@@ -1,0 +1,152 @@
+subject: Basics
+description: Core concepts of the Bias-Variance Tradeoff, common algorithms, and model performance.
+cards:
+  - front: |
+      # What is **Bias** in a Machine Learning Model?
+    back: |
+      Bias refers to the **error from erroneous assumptions** in the learning algorithm. High bias can cause a model to miss relevant relations between features and target outputs.
+
+      In simple terms, it's the model's tendency to consistently learn the wrong thing by being overly simplistic.
+
+      ### Characteristics of High Bias:
+      - **Leads to Underfitting**.
+      - The model is **too simple** to capture the underlying patterns in the data.
+      - It has **high error** on both the training and test datasets.
+      - *Example*: Using a linear regression model to fit a complex, non-linear (e.g., sinusoidal) dataset.
+
+  - front: |
+      # What is **Variance** in a Machine Learning Model?
+    back: |
+      Variance refers to the **error from sensitivity to small fluctuations** in the training set. High variance can cause a model to model the random noise in the training data, rather than the intended outputs.
+
+      In simple terms, it's how much the model's predictions would change if it were trained on a different training dataset.
+
+      ### Characteristics of High Variance:
+      - **Leads to Overfitting**.
+      - The model is **too complex** and essentially "memorizes" the training data, including its noise.
+      - It has **low error** on the training dataset but **high error** on the test dataset.
+      - *Example*: A deep decision tree that creates a specific path for almost every data point in the training set.
+
+  - front: |
+      # What is the **Bias-Variance Tradeoff**?
+    back: |
+      The Bias-Variance Tradeoff is a fundamental concept in supervised learning that describes the inverse relationship between a model's bias and its variance.
+
+      The goal of a model is to have low bias and low variance, but decreasing one tends to increase the other.
+
+      - **Simple Models**: (e.g., Linear Regression)
+        - **High Bias**, **Low Variance**.
+        - Consistently wrong, but in a predictable way.
+
+      - **Complex Models**: (e.g., Deep Decision Trees)
+        - **Low Bias**, **High Variance**.
+        - Can capture the training data perfectly, but performance is unstable on new data.
+
+      The ideal model is one that finds the optimal balance between the two for the best performance on unseen data.
+
+  - front: |
+      # How do **Underfitting** and **Overfitting** relate to Bias and Variance?
+    back: |
+      ## Underfitting
+      - **Cause**: The model is too simple to capture the underlying pattern of the data.
+      - **Characterized by**: **High Bias** and Low Variance.
+      - **Symptom**: The model performs poorly on **both** the training and test sets.
+
+      ## Overfitting
+      - **Cause**: The model is so complex that it fits the noise in the training data, not just the signal.
+      - **Characterized by**: **High Variance** and Low Bias.
+      - **Symptom**: The model performs extremely well on the training set but poorly on the test set.
+
+      | Model State | Training Error | Test Error | Bias | Variance |
+      |---|---|---|---|---|
+      | Underfitting | High | High | **High** | Low |
+      | **Good Fit** | **Low** | **Low** | **Low** | **Low** |
+      | Overfitting | Very Low | High | Low | **High** |
+
+  - front: |
+      # What is **Regularization** and how does it manage the Bias-Variance Tradeoff?
+    back: |
+      Regularization is a set of techniques used to **prevent overfitting** by adding a penalty term to the model's loss function. This penalty discourages the model from becoming too complex.
+
+      ### How it helps the Tradeoff:
+      - Regularization intentionally **increases the bias** of the model slightly.
+      - In return, it significantly **reduces the model's variance**.
+      - By adding this penalty, we constrain the model's flexibility, making it less likely to fit the noise in the training data and therefore improving its generalization to new data.
+
+  - front: |
+      # What are **L1 (Lasso)** and **L2 (Ridge)** Regularization?
+    back: |
+      They are two common types of regularization that differ in how they penalize the model's coefficients.
+
+      ## L1 Regularization (Lasso Regression)
+      - **Penalty**: Adds a penalty equal to the **absolute value** of the magnitude of coefficients.
+      - **Effect**: Can shrink some coefficients to **exactly zero**.
+      - **Use Case**: Useful for **feature selection**, as it effectively removes irrelevant features from the model.
+
+      ## L2 Regularization (Ridge Regression)
+      - **Penalty**: Adds a penalty equal to the **square** of the magnitude of coefficients.
+      - **Effect**: Shrinks coefficients towards zero but **never to exactly zero**.
+      - **Use Case**: Good for preventing multicollinearity and when you believe most features are useful. It is generally more stable than L1.
+
+  - front: |
+      # Supervised Learning: **Linear vs. Logistic Regression**
+    back: |
+      Both are simple, interpretable linear models, but they are used for different tasks.
+
+      ## Linear Regression
+      - **Task**: **Regression** (predicting a continuous value).
+      - **Output**: A continuous number (e.g., house price, temperature).
+      - **Algorithm**: Fits a straight line to the data that minimizes the sum of squared errors.
+
+      ## Logistic Regression
+      - **Task**: **Classification** (predicting a discrete class).
+      - **Output**: A probability (between 0 and 1) that is then mapped to a class.
+      - **Algorithm**: Uses a sigmoid function to squeeze the output of a linear equation into the [0, 1] range.
+
+  - front: |
+      # Supervised Learning: **Decision Trees vs. Random Forests**
+    back: |
+      ## Decision Trees
+      - **How it works**: A tree-like model that splits the data into branches based on feature values to make a decision.
+      - **Pros**: Very interpretable and easy to visualize.
+      - **Cons**: Prone to **high variance (overfitting)**. A single tree can be very sensitive to small changes in the training data.
+
+      ## Random Forest
+      - **How it works**: An **ensemble method** that builds many decision trees on random subsets of the data and features, then averages their predictions.
+      - **Pros**: Significantly **reduces the variance** of individual trees, leading to better generalization and less overfitting. Very powerful and robust.
+      - **Cons**: Less interpretable than a single decision tree.
+
+  - front: |
+      # Unsupervised Learning: **K-Means Clustering**
+    back: |
+      K-Means is an algorithm used to partition a dataset into a pre-determined number of `K` distinct, non-overlapping subgroups (clusters).
+
+      ## Goal:
+      To group similar data points together. Data points in the same cluster are very similar, while data points in different clusters are very different.
+
+      ## How it Works (Simplified):
+      1.  Randomly place `K` centroids.
+      2.  Assign each data point to the nearest centroid.
+      3.  Recalculate the position of each centroid to be the mean of all data points assigned to it.
+      4.  Repeat steps 2-3 until the clusters no longer change.
+
+      ## Common Applications:
+      - Customer Segmentation
+      - Document Clustering
+      - Image Compression
+
+  - front: |
+      # Unsupervised Learning: **Principal Component Analysis (PCA)**
+    back: |
+      PCA is a **dimensionality reduction** technique used to transform a large set of variables into a smaller one that still contains most of the information in the large set.
+
+      ## Goal:
+      To reduce the number of features in a dataset while minimizing information loss. It achieves this by creating new, uncorrelated variables called **principal components**.
+
+      ## How it Works (Simplified):
+      It finds the directions (principal components) in the data that maximize variance. The first principal component captures the most variance, the second captures the next most, and so on.
+
+      ## Common Applications:
+      - **Data Visualization**: Compressing data down to 2 or 3 dimensions to plot it.
+      - **Noise Reduction**: Filtering out the "noise" by dropping components with low variance.
+      - **Improving Model Performance**: Reducing the number of features to combat the curse of dimensionality and speed up training.

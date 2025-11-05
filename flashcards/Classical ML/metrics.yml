@@ -1,0 +1,242 @@
+subject: Metrics
+description: Key classification and regression metrics, their formulas, and their relationships.
+cards:
+  - front: |
+      # The **Confusion Matrix**
+
+      What are the four fundamental outcomes of a binary classification task?
+    back: |
+      A confusion matrix is a table used to describe the performance of a classification model. It breaks down predictions into four categories:
+
+      | | **Predicted: Positive** | **Predicted: Negative** |
+      |---|---|---|
+      | **Actual: Positive** | **True Positive (TP)** | **False Negative (FN)** |
+      | **Actual: Negative** | **False Positive (FP)** | **True Negative (TN)** |
+
+      - **True Positive (TP)**: Correctly predicted positive.
+      - **True Negative (TN)**: Correctly predicted negative.
+      - **False Positive (FP)**: Incorrectly predicted positive (a "false alarm"). This is a **Type I Error**.
+      - **False Negative (FN)**: Incorrectly predicted negative (a "miss"). This is a **Type II Error**.
+  - front: |
+      # **Type I vs. Type II Errors**
+
+      Explain what they are and how they relate to False Positives and False Negatives.
+    back: |
+      These terms originate from statistical hypothesis testing and correspond directly to the types of errors in a confusion matrix.
+
+      ## Type I Error (α)
+      - **Definition**: Rejecting a true null hypothesis. In ML, this is a **False Positive (FP)**.
+      - **AKA**: "A false alarm."
+      - **Example**: A medical test indicates a healthy person has a disease. A spam filter flags a legitimate email as spam. The cost of this error is often inconvenience or a follow-up action.
+
+      ## Type II Error (β)
+      - **Definition**: Failing to reject a false null hypothesis. In ML, this is a **False Negative (FN)**.
+      - **AKA**: "A miss."
+      - **Example**: A medical test fails to detect a disease in a sick person. A fraud detection system misses a fraudulent transaction. The cost of this error is often critical.
+
+      | Error Type | Statistical Term | ML Term | Analogy |
+      |---|---|---|---|
+      | **Type I** | Rejecting a true null | **False Positive** | Crying wolf when there is no wolf. |
+      | **Type II**| Failing to reject a false null | **False Negative**| Failing to cry wolf when there is one. |
+
+  - front: |
+      # What is **Accuracy**?
+
+      Provide its formula and explain when it can be a misleading metric.
+    back: |
+      Accuracy measures the proportion of total predictions that were correct. It provides a general sense of model performance.
+
+      ## Formula:
+      ```
+      Accuracy = (TP + TN) / (TP + TN + FP + FN)
+      ```
+      It answers the question: **"Overall, how often is the model correct?"**
+
+      ---
+      ### When is it Misleading?
+      Accuracy is a poor metric for **imbalanced datasets**. If a dataset has 99% negative samples and 1% positive samples, a model that *always* predicts "negative" will have 99% accuracy but will be completely useless for identifying positive cases.
+
+  - front: |
+      # What is **Precision**?
+
+      Provide its formula and its relationship to False Positives.
+    back: |
+      Precision measures the proportion of positive predictions that were actually correct.
+
+      ## Formula:
+      ```
+      Precision = TP / (TP + FP)
+      ```
+      It answers the question: **"Of all the times the model predicted positive, how often was it right?"**
+
+      ---
+      ### Relationship to False Positives:
+      Precision is a measure of the "quality" or "exactness" of positive predictions. A high precision score means the model has a **low False Positive Rate** among its positive predictions. It is the metric to optimize when the cost of a False Positive is high (e.g., a spam filter marking an important email as spam).
+
+  - front: |
+      # What is **Recall** (Sensitivity / True Positive Rate)?
+
+      Provide its formula and its relationship to False Negatives.
+    back: |
+      Recall measures the proportion of actual positive cases that the model was able to correctly identify. It is also known as **Sensitivity** or **True Positive Rate (TPR)**.
+
+      ## Formula:
+      ```
+      Recall = TP / (TP + FN)
+      ```
+      It answers the question: **"Of all the actual positive cases, what fraction did the model successfully find?"**
+
+      ---
+      ### Relationship to False Negatives:
+      Recall is a measure of the "completeness" or "quantity" of positive predictions. A high recall score means the model has a **low False Negative Rate (FNR)**. It is the metric to optimize when the cost of a False Negative is high (e.g., failing to detect a fraudulent transaction or a serious disease).
+
+  - front: |
+      # The **Precision-Recall Trade-off**
+
+      Explain the inverse relationship between Precision and Recall.
+    back: |
+      In many classification models, you can adjust a **classification threshold** to make the model more or less sensitive. This creates an inverse relationship between precision and recall.
+
+      - **Increasing Precision (reducing FPs)**: If you make the model more "strict" about predicting positive (e.g., requiring a >0.9 confidence score), you will have fewer False Positives, but you will inevitably miss more true positive cases, thus **decreasing Recall**.
+
+      - **Increasing Recall (reducing FNs)**: If you make the model more "lenient" (e.g., requiring only a >0.3 confidence score), you will capture more true positives, but you will also incorrectly label more negatives as positives, thus **decreasing Precision**.
+
+      The choice of balance depends on the business problem.
+
+  - front: |
+      # What is the **F1-Score**?
+
+      Provide its formula and explain its purpose.
+    back: |
+      The F1-Score is the **harmonic mean** of Precision and Recall. It provides a single score that balances both metrics.
+
+      ## Formula:
+      ```
+      F1-Score = 2 * (Precision * Recall) / (Precision + Recall)
+      ```
+      The F1-Score punishes extreme values more than a simple average. A model must have both high precision and high recall to achieve a high F1-Score.
+
+      ---
+      ### Purpose:
+      It is particularly useful for **imbalanced datasets** where a balance between correctly identifying positive cases (Recall) and not making too many false alarms (Precision) is needed.
+
+  - front: |
+      # What is the **False Positive Rate (FPR)**?
+
+      Provide its formula and relationship to Specificity.
+    back: |
+      The False Positive Rate measures the proportion of actual negative cases that were incorrectly classified as positive.
+
+      ## Formula:
+      ```
+      FPR = FP / (FP + TN)
+      ```
+      It answers the question: **"What fraction of all actual negatives did the model incorrectly label as positive?"**
+
+      ---
+      ### Relationship to Specificity:
+      The FPR is the direct opposite of Specificity (or True Negative Rate). `FPR = 1 - Specificity`.
+
+  - front: |
+      # What is the **False Negative Rate (FNR)**?
+
+      Provide its formula and relationship to Recall.
+    back: |
+      The False Negative Rate measures the proportion of actual positive cases that were incorrectly classified as negative (i.e., were "missed").
+
+      ## Formula:
+      ```
+      FNR = FN / (FN + TP)
+      ```
+      It answers the question: **"What fraction of all actual positives did the model miss?"**
+
+      ---
+      ### Relationship to Recall:
+      The FNR is the direct opposite of Recall (or True Positive Rate). `FNR = 1 - Recall`.
+
+  - front: |
+      # What is the **ROC Curve** and **AUC**?
+    back: |
+      ## ROC (Receiver Operating Characteristic) Curve:
+      An ROC curve is a graph showing a classifier's performance across all classification thresholds. It plots:
+      - **Y-axis**: **True Positive Rate (Recall)**
+      - **X-axis**: **False Positive Rate (FPR)**
+
+      A better model has a curve closer to the top-left corner. A diagonal line represents a random-guess model.
+
+      ## AUC (Area Under the Curve):
+      The AUC is the **area under the ROC curve**. It provides an aggregate measure of performance.
+      - **AUC = 1**: Perfect classifier.
+      - **AUC = 0.5**: Useless classifier (random guessing).
+
+  - front: |
+      # **Mean Absolute Error (MAE)**
+
+      What is it and what is its formula?
+    back: |
+      MAE measures the average absolute difference between the predicted values and the actual values. It gives an idea of the magnitude of the error but not its direction.
+
+      ## Formula:
+      ```
+      MAE = (1/n) * Σ |actualᵢ - predictedᵢ|
+      ```
+      Where `n` is the number of samples.
+
+      ---
+      ### Key Characteristics:
+      - **Units**: Same as the target variable, making it easy to interpret.
+      - **Outlier Sensitivity**: It is less sensitive to outliers than MSE because errors are not squared.
+
+  - front: |
+      # **Mean Squared Error (MSE)**
+
+      What is it and what is its formula?
+    back: |
+      MSE measures the average of the squares of the errors—that is, the average squared difference between the estimated values and the actual value.
+
+      ## Formula:
+      ```
+      MSE = (1/n) * Σ (actualᵢ - predictedᵢ)²
+      ```
+      Where `n` is the number of samples.
+
+      ---
+      ### Key Characteristics:
+      - **Units**: The square of the target variable's units, making it less intuitive to interpret.
+      - **Outlier Sensitivity**: It is **highly sensitive to outliers** because large errors are squared, giving them a disproportionately high weight. This property makes it useful for optimization as it penalizes large errors heavily.
+
+  - front: |
+      # **Root Mean Squared Error (RMSE)**
+
+      What is it and how does it relate to MSE?
+    back: |
+      RMSE is the square root of the Mean Squared Error (MSE).
+
+      ## Formula:
+      ```
+      RMSE = sqrt( MSE ) = sqrt( (1/n) * Σ (actualᵢ - predictedᵢ)² )
+      ```
+
+      ---
+      ### Key Characteristics:
+      - **Units**: Same as the target variable, which makes it **more interpretable** than MSE.
+      - **Outlier Sensitivity**: Like MSE, it is still very sensitive to large errors (outliers) because the errors are squared before being averaged. It is one of the most common regression metrics.
+
+  - front: |
+      # **R-squared (R²)** or Coefficient of Determination
+
+      What does it represent?
+    back: |
+      R-squared represents the **proportion of the variance** in the target variable that is predictable from the model's features. It provides a relative measure of how well the model's predictions approximate the real data points.
+
+      ## Formula:
+      ```
+      R² = 1 - (Sum of Squared Residuals / Total Sum of Squares)
+      R² = 1 - ( Σ(actualᵢ - predictedᵢ)² / Σ(actualᵢ - mean(actual))² )
+      ```
+      
+      ---
+      ### Interpretation:
+      - **Range**: Typically 0 to 1.
+      - **Meaning**: An R² of 0.75 means that 75% of the variability in the target variable can be explained by the model. A higher value indicates a better fit.
+      - **Flaw**: R² will never decrease if you add more features to the model, even if they are irrelevant. This can be misleading. **Adjusted R²** corrects for this flaw.

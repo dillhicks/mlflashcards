@@ -1,0 +1,137 @@
+subject: LLM Architecture Basics
+description: Core concepts in Large Language Model architecture and transformers
+cards:
+  - front: |
+      # What is the **Transformer architecture**?
+    back: |
+      A neural network architecture introduced in the paper *"Attention Is All You Need"* (2017) that has become the foundation for most state-of-the-art LLMs.
+
+      It relies on **self-attention mechanisms** instead of recurrence (like LSTMs or RNNs), allowing for more parallelization during training and better capturing of long-range dependencies in text.
+
+  - front: |
+      # What are the main types of **Transformer architectures**?
+    back: |
+      There are three main types, each suited for different tasks:
+
+      1.  **Encoder-Decoder Models**
+          - *Examples*: The original Transformer, T5, BART
+          - *Use Case*: Sequence-to-sequence tasks like translation or summarization. The encoder creates a rich representation of the input, and the decoder generates the output.
+
+      2.  **Encoder-only Models**
+          - *Example*: BERT
+          - *Use Case*: Tasks requiring a deep understanding of the input text, like classification, named entity recognition, or sentiment analysis. They are not designed for text generation.
+
+      3.  **Decoder-only Models**
+          - *Example*: GPT series
+          - *Use Case*: Auto-regressive, generative tasks like text completion, chatbots, and creative writing.
+
+  - front: |
+      # What is the general data flow for a query in a **Decoder-only LLM**?
+    back: |
+      It's an auto-regressive, token-by-token generation process:
+
+      1.  **Tokenization**: The input text (prompt) is broken down into a sequence of numerical tokens.
+      2.  **Embedding**: Each token is converted into a vector embedding.
+      3.  **Positional Encoding**: Information about each token's position is added to its embedding.
+      4.  **Decoder Blocks**: These vectors are processed through a stack of decoder blocks, each applying self-attention and feed-forward networks.
+      5.  **Logits Prediction**: The output from the final block is fed into a linear layer to produce a score (logit) for every possible token in the vocabulary.
+      6.  **Softmax**: A softmax function converts these logits into a probability distribution.
+      7.  **Token Selection**: The model selects the next token based on these probabilities (e.g., taking the highest one).
+      8.  **Append and Repeat**: This new token is appended to the input sequence, and the entire process repeats to generate the next token.
+
+  - front: |
+      # What is **Tokenization** and why is it necessary?
+    back: |
+      Tokenization is the process of breaking down raw text into smaller units called **tokens**. These can be words, subwords, or characters.
+
+      It's a necessary first step because LLMs are mathematical models that operate on numbers, not raw text. Tokenization converts the text into a sequence of numerical IDs that the model can process in its embedding layer.
+
+  - front: |
+      # How does **Subword Tokenization** work and why is it beneficial?
+    back: |
+      Subword tokenization breaks down rare words into smaller, more common units while keeping frequent words as single tokens.
+      
+      *Example*: `tokenization` -> `token` + `ization`
+
+      ### Benefits:
+      - **Handles Out-of-Vocabulary (OOV) words**: The model can understand new or rare words by breaking them into familiar subwords.
+      - **Manages Vocabulary Size**: It keeps the vocabulary from becoming excessively large.
+      - **Captures Morphology**: It helps the model understand relationships between words like "run," "running," and "ran."
+
+      A popular algorithm for this is **Byte-Pair Encoding (BPE)**.
+
+  - front: |
+      # What is an **Embedding Layer** and what is its purpose?
+    back: |
+      The embedding layer is the first layer of the network. Its purpose is to convert the numerical token IDs into dense vector representations called **embeddings**.
+
+      These embeddings are learned during training and are designed to capture the semantic meaning of the tokens. Words with similar meanings will have similar vector representations in the embedding space.
+
+  - front: |
+      # Why is **Positional Encoding** needed in Transformers?
+    back: |
+      The Transformer's self-attention mechanism is inherently **order-agnostic**; it processes all tokens simultaneously without knowing their order.
+
+      Positional encodings are vectors that are added to the token embeddings to provide the model with explicit information about the position of each token in the sequence. Without them, the model would treat the input as a "bag of words" and lose the meaning derived from word order.
+
+  - front: |
+      # What is the core idea behind the **Self-Attention mechanism**?
+    back: |
+      Self-attention allows each token in a sequence to dynamically weigh its interaction with all other tokens in the *same* sequence.
+
+      For each word, it calculates an "attention score" to determine how much focus to place on every other word in the input. This enables the model to create contextually rich representations by understanding which words are most relevant to each other, regardless of their distance.
+
+  - front: |
+      # What are **Query, Key, and Value** vectors in self-attention?
+    back: |
+      For each input token's embedding, three distinct vectors are created by multiplying it with learned weight matrices
+
+      - **Query (Q)**: Represents the current token's focus, asking "what am I looking for?"
+      - **Key (K)**: Represents what other tokens have to offer, like a label for the value. It's compared against the Query.
+      - **Value (V)**: Contains the actual information or substance of a token.
+
+      The attention score is calculated between the `Query` of the current token and the `Key` of every other token. These scores then weight the `Value` vectors to produce the final output for the current token.
+
+  - front: |
+      # What is **Multi-Head Attention** and why is it an improvement?
+    back: |
+      Multi-Head Attention improves upon self-attention by allowing the model to focus on different aspects of the input simultaneously.
+
+      Instead of one set of Q, K, V weights, it has multiple **"heads,"** each with its own learned weights. This enables the model to jointly attend to information from different representation subspaces in parallel.
+
+      *Analogy*: One head might focus on syntactic relationships, while another focuses on semantic relationships, creating a richer final representation.
+
+  - front: |
+      # What is the role of the **Feed-Forward Network** in a Transformer block?
+    back: |
+      Each Transformer block contains a position-wise **Feed-Forward Network (FFN)** that is applied to each token's representation independently after the attention step.
+
+      It consists of two linear transformations with a non-linear activation function (like ReLU) in between. Its purpose is to provide additional computational depth and transform the attention outputs into a more suitable form for the next Transformer block.
+
+  - front: |
+      # What are **Residual Connections** and why are they important for deep Transformers?
+    back: |
+      Residual connections (or **skip connections**) route the input of a sub-layer directly to its output, where it is added to the sub-layer's result.
+
+      They are crucial for training very deep networks (with many layers) because they help mitigate the **vanishing gradient problem**. By providing a shorter path for the gradient to flow during backpropagation, they enable stable training of models with hundreds of layers.
+
+  - front: |
+      # What is **Layer Normalization** and why is it used in Transformers?
+    back: |
+      Layer Normalization is a technique that stabilizes the training process by normalizing the activations within a single layer for a given input.
+
+      In Transformers, it is applied after each sub-layer (attention and feed-forward network). This helps to smooth the optimization landscape, reduce the model's sensitivity to weight initialization, and generally makes training faster and more reliable.
+
+  - front: |
+      # What is the purpose of **Masked Self-Attention** in a decoder?
+    back: |
+      Masked self-attention is essential for **auto-regressive text generation**.
+
+      It ensures that when predicting the token at a certain position, the model can only attend to the tokens that came before it (and the current token itself). This is done by **"masking"** or setting the attention scores for all future positions to negative infinity before the softmax function. This prevents the model from "cheating" by looking ahead in the sequence it is trying to generate.
+
+  - front: |
+      # What is the role of the final **Linear and Softmax layers**?
+    back: |
+      After the final decoder block processes the sequence, a final **linear layer** projects the resulting vector representation into a much larger vector with a size equal to the vocabulary. This is called the **"logits" vector**.
+
+      The **softmax layer** then converts these raw logit scores into a probability distribution, where each value represents the model's confidence that a specific token from the vocabulary is the correct *next* token in the sequence.
