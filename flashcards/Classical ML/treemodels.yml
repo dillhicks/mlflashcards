@@ -1,0 +1,134 @@
+subject: Tree-Based Models
+description: Concepts of Decision Trees, Random Forests, Bagging, and Boosting.
+cards:
+  - front: |
+      # What is a **Decision Tree**?
+    back: |
+      A Decision Tree is a supervised learning model that uses a tree-like structure to make predictions.
+
+      It works by learning a hierarchy of simple if/else questions about the input features. Each internal node in the tree represents a "test" on a feature, each branch represents the outcome of the test, and each leaf node represents a final decision or prediction.
+
+      ### Use Cases:
+      - **Classification**: Leaf nodes represent a class label.
+      - **Regression**: Leaf nodes represent a continuous value.
+
+  - front: |
+      # How does a **Regression Tree** work?
+    back: |
+      A Regression Tree makes predictions by segmenting the feature space into a number of simple regions.
+
+      ### Prediction Process:
+      1.  A new data point is passed down the tree, starting from the root.
+      2.  At each internal node, a condition on one of the features is checked (e.g., `Is square_footage <= 1500?`).
+      3.  The data point follows the branch corresponding to the outcome of the condition.
+      4.  This continues until a terminal **leaf node** is reached.
+      5.  The final prediction for the data point is the **average target value** of all the training instances that fell into that same leaf during training.
+
+  - front: |
+      # How does a Decision Tree decide on the **best split**?
+    back: |
+      A Decision Tree decides on the best split by searching for the feature and the threshold value that results in the "purest" possible child nodes. "Purity" means that the resulting groups are as homogeneous as possible.
+
+      The algorithm iterates through all features and all possible split points, calculating an **impurity metric** or **information gain** for each potential split. The split that results in the greatest improvement is chosen.
+
+  - front: |
+      # What are **Gini Impurity** and **Entropy**?
+    back: |
+      Gini Impurity and Entropy are the two main metrics used to measure the impurity of a node in a **classification** tree. The goal is to choose a split that minimizes the impurity of the resulting child nodes.
+
+      - **Gini Impurity**: Measures the probability of incorrectly classifying a randomly chosen element in the node if it were randomly labeled according to the class distribution in the node. A score of 0 is a perfectly pure node.
+
+      - **Entropy**: A measure of randomness or disorder in a node. A node with high entropy is very mixed. The algorithm chooses the split that provides the highest **Information Gain**, which is the reduction in entropy.
+
+      Both metrics generally produce very similar trees. Gini is slightly faster to compute.
+
+  - front: |
+      # How is the split decided in a **Regression Tree**?
+    back: |
+      In a regression tree, the goal is to create leaf nodes where the target values are as close to each other as possible.
+
+      The most common metric used for splitting is **Mean Squared Error (MSE)**.
+
+      The algorithm chooses the feature and split point that results in the largest reduction in the total MSE of the child nodes compared to the parent node. The prediction at a leaf is the mean of the target values of the training instances in that leaf.
+
+  - front: |
+      # Why are single Decision Trees prone to **overfitting**?
+    back: |
+      Single decision trees are prone to overfitting because, if left unconstrained, they can grow deep enough to create a specific leaf for every single training instance.
+
+      The model will have a very low training error because it has essentially "memorized" the training data. However, it will have a high test error because it has also learned the noise in the data and will not generalize well to new, unseen examples. This is a classic case of **high variance**.
+
+  - front: |
+      # What is **Ensemble Learning**?
+    back: |
+      Ensemble Learning is a technique where multiple machine learning models (often called "weak learners") are strategically combined to solve the same problem.
+
+      The core idea is that a "committee" of models will often make better predictions than any single model alone. Bagging and Boosting are the two most common types of ensemble methods.
+
+  - front: |
+      # What is **Bagging (Bootstrap Aggregating)**?
+    back: |
+      Bagging is an ensemble technique that aims to **reduce variance** and combat overfitting.
+
+      ### How it Works:
+      1.  **Bootstrap**: Create many random subsets (with replacement) of the original training data. Each subset is the same size as the original dataset.
+      2.  **Aggregate**: Train a separate model (e.g., a Decision Tree) independently on each of these subsets.
+      3.  **Vote/Average**: Combine the predictions of all models. For classification, this is done by a majority vote. For regression, it's done by taking the average.
+
+  - front: |
+      # What is a **Random Forest**?
+    back: |
+      A Random Forest is an improvement upon the Bagging method, specifically using Decision Trees as the base model.
+
+      It uses the same bootstrapping process as Bagging, but with one key difference:
+      - **Feature Randomness**: When deciding on the best split at each node, each tree is only allowed to search through a **random subset of the total features**.
+
+      This added randomness helps to **decorrelate the trees**. If one feature is very strong, Bagging would use it in most trees. Random Forest forces the trees to explore other, potentially useful features, making the final ensemble more robust.
+
+  - front: |
+      # What is **Boosting**?
+    back: |
+      Boosting is an ensemble technique that aims to convert a collection of weak learners into a single strong learner by training them **sequentially**.
+
+      ### How it Works:
+      1.  Train a simple base model on the data.
+      2.  Identify the errors made by this model. The instances that were misclassified are given higher weights.
+      3.  Train a new model that focuses specifically on correcting the mistakes of the previous one.
+      4.  Repeat this process, with each new model learning from the errors of the ensemble so far.
+
+      The final prediction is a weighted sum of the predictions from all the models.
+
+  - front: |
+      # **Bagging vs. Boosting**: What is the key difference?
+    back: |
+      The key difference lies in how the models are trained and combined.
+
+      | Feature | Bagging (e.g., Random Forest) | Boosting (e.g., Gradient Boosting) |
+      |---|---|---|
+      | **Training** | Models are trained **in parallel** and independently. | Models are trained **sequentially**. Each model learns from the previous one's mistakes. |
+      | **Main Goal** | **Reduces Variance** (prevents overfitting). | **Reduces Bias** (improves accuracy on underfitted models). |
+      | **Data Weighting**| All training samples are weighted equally. | Misclassified samples get higher weights for the next model.|
+      | **Final Prediction**| Simple averaging or voting. | Weighted sum of all models' predictions.|
+
+  - front: |
+      # What is **Gradient Boosting**?
+    back: |
+      Gradient Boosting is an advanced boosting technique where each new model is trained to predict the **residual errors** of the preceding model's prediction.
+
+      ### How it Works (Simplified):
+      1.  Start with a simple initial prediction (e.g., the mean of the target values).
+      2.  Calculate the errors (residuals) between this prediction and the actual values.
+      3.  Fit a new model (a small decision tree) to these **residuals**.
+      4.  Add the prediction of this new model to the initial prediction to get an improved overall prediction.
+      5.  Repeat steps 2-4, with each new tree trying to correct the remaining error.
+
+  - front: |
+      # What is **Tree Pruning**?
+    back: |
+      Tree Pruning is a regularization technique used to **reduce the complexity** of a single Decision Tree and prevent overfitting.
+
+      It involves removing sections (subtrees) that provide little predictive power.
+
+      ### Common Methods:
+      - **Pre-Pruning (Early Stopping)**: Stop the tree from growing once it hits a certain condition (e.g., maximum depth, minimum samples per leaf).
+      - **Post-Pruning**: Grow the tree to its full depth first, then remove branches that do not significantly improve performance on a validation set.

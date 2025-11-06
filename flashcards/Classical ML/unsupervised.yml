@@ -1,0 +1,122 @@
+subject: Unsupervised Learning
+description: Core concepts for K-Means clustering and Principal Component Analysis (PCA).
+cards:
+  - front: |
+      # What is **K-Means Clustering**?
+    back: |
+      K-Means is an unsupervised learning algorithm whose goal is to partition `n` data points into `K` distinct, non-overlapping subgroups (clusters).
+
+      It aims to create tight clusters where the data points within a cluster are as similar as possible, and data points in different clusters are as dissimilar as possible.
+
+  - front: |
+      # What is the objective that K-Means tries to optimize?
+    back: |
+      The objective of K-Means is to minimize the **Within-Cluster Sum of Squares (WCSS)**, also known as **inertia**.
+
+      This is the sum of the squared distances between each data point and the centroid of its assigned cluster. A lower WCSS value indicates denser, more compact clusters.
+
+  - front: |
+      # What are the high-level steps of the K-Means algorithm?
+    back: |
+      K-Means is an iterative algorithm that repeats two main steps until convergence:
+
+      1.  **Assignment Step**: Assign each data point to the cluster with the nearest centroid (typically using Euclidean distance).
+
+      2.  **Update Step**: Recalculate the centroid of each cluster to be the mean of all data points assigned to it.
+
+      This process is repeated until the cluster assignments no longer change.
+
+  - front: |
+      # What is the problem with **Random Initialization** in K-Means?
+    back: |
+      Random initialization is the simplest strategy, where `K` initial centroids are chosen randomly from the data points.
+
+      The main problem is that K-Means can converge to a **local minimum** of WCSS, not the global minimum. A poor random initialization can lead to poorly formed clusters and a suboptimal result. The final clustering is highly sensitive to the initial placement of centroids.
+
+  - front: |
+      # What is **K-Means++ Initialization**?
+    back: |
+      K-Means++ is a "smart" initialization technique designed to find better starting centroids than the random approach.
+
+      Its goal is to place the initial centroids far away from each other, which makes the algorithm less likely to converge to a poor local optimum and generally leads to better and more consistent clustering results.
+
+  - front: |
+      # How does the **K-Means++** algorithm work?
+    back: |
+      1.  Choose the first centroid uniformly at random from the data points.
+      2.  For each subsequent centroid:
+          - Calculate the squared distance `D(x)²` from each data point `x` to the *nearest* existing centroid.
+          - Choose the next centroid from the data points with a probability proportional to `D(x)²`.
+      3.  Repeat step 2 until all `K` centroids have been chosen.
+
+      This method makes it more likely to select points that are far from existing centroids.
+
+  - front: |
+      # How do you choose the value of **K** for K-Means?
+    back: |
+      The most common method is the **Elbow Method**.
+
+      1.  Run K-Means for a range of `K` values (e.g., 1 to 10).
+      2.  For each `K`, calculate the Within-Cluster Sum of Squares (WCSS).
+      3.  Plot the WCSS against the number of clusters `K`.
+
+      The plot will typically show a sharp decrease that then flattens out. The "elbow" point on the curve, where the rate of decrease slows, is considered the optimal value for `K`.
+
+  - front: |
+      # What is **Principal Component Analysis (PCA)**?
+    back: |
+      PCA is an unsupervised **dimensionality reduction** technique.
+
+      Its goal is to reduce the number of features (dimensions) in a dataset while retaining as much of the original information (variance) as possible. It achieves this by creating a new set of uncorrelated features called **principal components**.
+
+  - front: |
+      # What is the main objective of PCA?
+    back: |
+      The main objective of PCA is to find the **directions of maximum variance** in the data. These directions are represented by the principal components.
+
+      The first principal component is the direction that captures the most variance in the data. The second is the next most important direction that is orthogonal (uncorrelated) to the first, and so on.
+
+  - front: |
+      # What is the general dataflow of the PCA algorithm?
+    back: |
+      The PCA workflow transforms data into a lower-dimensional space through these steps:
+
+      1.  **Standardize the Data**: Scale the features to have a mean of 0 and a standard deviation of 1.
+      2.  **Compute the Covariance Matrix**: Calculate how the standardized features vary with respect to each other.
+      3.  **Calculate Eigenvectors & Eigenvalues**: Decompose the covariance matrix to find the principal components (eigenvectors) and their magnitudes (eigenvalues).
+      4.  **Sort Components**: Rank the eigenvectors in descending order based on their corresponding eigenvalues.
+      5.  **Select Principal Components**: Choose the top `k` eigenvectors that capture the desired amount of variance.
+      6.  **Transform Data**: Project the original standardized data onto the selected eigenvectors to get the new, lower-dimensional feature set.
+
+  - front: |
+      # What are **Principal Components**?
+    back: |
+      Principal components are new features that are constructed as **linear combinations** of the original features.
+
+      They are uncorrelated with each other and are ordered so that the first few components retain most of the variation present in all of the original variables. They form a new, lower-dimensional feature space.
+
+  - front: |
+      # What is the role of **Eigenvectors and Eigenvalues** in PCA?
+    back: |
+      Eigenvectors and eigenvalues are calculated from the covariance matrix of the data.
+
+      - **Eigenvectors**: Define the **direction** of the principal components. They are the axes of the new feature space.
+
+      - **Eigenvalues**: Indicate the **magnitude** or importance of the corresponding eigenvector. A higher eigenvalue means that its eigenvector captures more variance from the data.
+
+  - front: |
+      # Why is **data scaling** a critical pre-processing step for PCA?
+    back: |
+      PCA is highly sensitive to the scale of the input features. If one feature has a much larger range of values than others (e.g., salary vs. years of experience), it will dominate the variance calculation.
+
+      PCA will incorrectly assume that this feature is the most important direction. **Standardizing** the data (e.g., using StandardScaler to give each feature a mean of 0 and a standard deviation of 1) ensures that all features contribute equally to the analysis.
+
+  - front: |
+      # How do you choose the number of **principal components** to keep?
+    back: |
+      A common method is to use an **Explained Variance Plot** (or Scree Plot).
+
+      1.  Calculate the percentage of variance explained by each principal component.
+      2.  Plot the **cumulative explained variance** against the number of components.
+
+      You can then choose the number of components that captures a desired percentage of the total variance (e.g., 95%). This allows you to make an informed trade-off between dimensionality reduction and information loss.

@@ -1,0 +1,263 @@
+subject: Deep Learning Basics
+description: Fundamental concepts of neural networks, from activation functions to regularization.
+cards:
+
+  - front: |
+      # What is a **Fully Connected (Dense) Layer**?
+    back: |
+      A fully connected layer, or dense layer, is a layer in a neural network where **every neuron** in the layer is connected to **every neuron** in the previous layer.
+
+      It is the most common type of layer. Each connection has its own weight. This layer learns linear relationships between the features from the previous layer, which are then passed through an activation function to learn non-linear patterns.
+
+  - front: |
+      # What is an **Epoch vs. Batch vs. Iteration**?
+    back: |
+      These terms define the training loop of a neural network:
+
+      - **Epoch**: One complete pass of the **entire training dataset** through the neural network.
+      
+      - **Batch (or Mini-Batch)**: A small, manageable subset of the total training dataset. The entire dataset is split into these batches.
+
+      - **Iteration**: A single update of the model's weights. An iteration consists of processing one batch of data (one forward pass and one backward pass).
+
+      If a dataset has 10,000 samples and a batch size of 100, then one epoch will consist of `10,000 / 100 = 100` iterations.
+
+  
+  - front: |
+      # What is **Binary Cross-Entropy** loss?
+    back: |
+      Binary Cross-Entropy (or Log Loss) is the most common loss function for **binary classification** problems.
+
+      ### How it Works:
+      It measures the difference between two probability distributions: the true labels (e.g., [0, 1]) and the model's predicted probabilities (e.g., [0.1, 0.9]).
+
+      The loss is low when the predicted probability is close to the actual label, and it increases exponentially as the prediction moves away from the actual label. It is used with a **Sigmoid** activation function in the output layer.
+
+  - front: |
+      # What is **Categorical Cross-Entropy** loss?
+    back: |
+      Categorical Cross-Entropy is the most common loss function for **multi-class classification** problems.
+
+      ### How it Works:
+      It is a generalization of binary cross-entropy. It measures the difference between the true class distribution (a one-hot encoded vector like `[0, 0, 1, 0]`) and the model's predicted probability distribution from the **Softmax** function.
+
+      The loss is minimized when the model assigns a high probability to the correct class and low probabilities to all other classes.
+
+  - front: |
+      # What is the **Tanh** Activation Function?
+    back: |
+      The Tanh (Hyperbolic Tangent) activation function is similar to the sigmoid function but maps inputs to a range of **[-1, 1]**.
+
+      ## Function:
+      `tanh(x) = (eˣ - e⁻ˣ) / (eˣ + e⁻ˣ)`
+
+      ### Pros & Cons:
+      - **Pro**: Its output is **zero-centered**, which can help with optimization by making the gradients less biased in one direction.
+      - **Con**: Like the sigmoid function, it **saturates** at both extremes, which can lead to the vanishing gradient problem.
+
+      It was historically preferred over sigmoid for hidden layers but has been largely replaced by ReLU.
+
+  - front: |
+      # What is **Backpropagation**?
+    back: |
+      Backpropagation (short for "backward propagation of errors") is the core algorithm used to train neural networks. It efficiently calculates the gradient of the loss function with respect to each weight in the network.
+
+      ### Two-Phase Process:
+      1.  **Forward Pass**: Input data is fed through the network to generate a prediction. The error is calculated using a loss function.
+      2.  **Backward Pass**: The algorithm moves backward from the loss function, using the **chain rule** of calculus to compute the gradient of the loss with respect to each weight. These gradients are then used to update the weights.
+
+  - front: |
+      # What are **Xavier/Glorot** and **He** Initialization?
+    back: |
+      These are two "smart" weight initialization strategies designed to maintain the variance of activations across layers.
+
+      ## Xavier (or Glorot) Initialization
+      - **When to Use**: Works best with activation functions that are symmetric around zero, like **Sigmoid** and **Tanh**.
+      - **How it Works**: It draws weights from a distribution with a variance based on the number of input and output neurons.
+
+      ## He Initialization
+      - **When to Use**: Specifically designed for **ReLU** and its variants.
+      - **How it Works**: It only considers the number of input neurons, which accounts for the fact that ReLU sets half of the activations to zero.
+
+  - front: |
+      # Why is **Data Normalization** needed for neural networks?
+    back: |
+      Data normalization (or standardization) is a critical pre-processing step where you scale the input features to be on a similar range.
+
+      ### Key Reasons:
+      1.  **Faster Convergence**: It helps the gradient descent algorithm converge much faster by creating a more symmetrical loss landscape.
+      2.  **Prevents Weight Bias**: Prevents features with larger scales from dominating the learning process.
+      3.  **Compatibility with Activations**: Keeps inputs in a non-saturating range for functions like sigmoid and tanh.
+
+  - front: |
+      # What is **Dropout**?
+    back: |
+      Dropout is a powerful **regularization technique** to prevent overfitting.
+
+      ### How it Works:
+      During each training step, a random fraction of the neurons in a layer are temporarily "dropped out" or ignored.
+
+      ### Why it's Effective:
+      It prevents neurons from **co-adapting** too much. This forces the network to learn more robust and redundant features, improving its ability to generalize to new data.
+
+  - front: |
+      # What is **Data Augmentation**?
+    back: |
+      Data Augmentation is a regularization technique that artificially **increases the size and diversity of the training dataset**.
+
+      ### How it Works:
+      It applies random but realistic transformations to the existing training data. For images, common augmentations include:
+      - Random rotations, crops, and flips
+      - Brightness and contrast adjustments
+      - Adding noise
+
+      This helps the model become more invariant to these transformations and improves its ability to generalize to new, unseen data.
+
+  - front: |
+      # What is **Batch Normalization**?
+    back: |
+      Batch Normalization is a technique that normalizes the activations of a layer for each mini-batch during training.
+
+      ### Benefits:
+      - **Reduces Internal Covariate Shift**: Stabilizes the distribution of inputs to layers, speeding up training.
+      - **Acts as a Regularizer**: The noise from the mini-batch statistics has a slight regularizing effect.
+      - **Allows for Higher Learning Rates**: Makes the network more robust.
+
+  - front: |
+      # What is **Layer Normalization**?
+    back: |
+      Layer Normalization is an alternative to Batch Normalization. Instead of normalizing across the batch dimension, it normalizes across the **feature dimension** for each individual training sample.
+
+      ### When to Use:
+      Layer Normalization is particularly effective for **Recurrent Neural Networks (RNNs)** and **Transformers**, where the batch statistics can be noisy or vary significantly between time steps.
+
+  - front: |
+      # What is the **"Dying ReLU"** or **"Dead Neuron"** problem?
+    back: |
+      The Dying ReLU problem occurs when a neuron's weights are updated in such a way that the input to the ReLU function is always negative.
+
+      ### Consequence:
+      - The output of the neuron will always be `0`.
+      - The gradient flowing through that neuron will also be `0`.
+      - The neuron effectively "dies" and stops learning, as its weights can no longer be updated. This can happen if the learning rate is too high.
+
+  - front: |
+      # What is **Gradient Clipping**?
+    back: |
+      Gradient Clipping is a technique used to solve the **exploding gradient problem**.
+
+      ### How it Works:
+      During backpropagation, it checks if the norm (magnitude) of the gradients exceeds a pre-defined threshold. If it does, the gradients are scaled down to match the threshold value before the weight update is applied.
+
+      This prevents the weight updates from becoming too large and keeps the training process stable, especially in Recurrent Neural Networks.
+  - front: |
+      # The **Chain Rule**: The Engine of Backpropagation
+    back: |
+      The chain rule is a fundamental rule in calculus for finding the derivative of a composite function (a function nested inside another).
+
+      ### Formula:
+      If `y = f(u)` and `u = g(x)`, then the derivative of `y` with respect to `x` is:
+      `dy/dx = dy/du * du/dx`
+
+      ### Why it Matters for Deep Learning:
+      A neural network is a giant composite function where layers are nested. The loss `L` is a function of the output `ŷ`, which is a function of the pre-activation `z`, which is a function of the weight `w`. The chain rule allows us to calculate how a change in a weight `w` deep inside the network affects the final loss `L`.
+
+  - front: |
+      # The **Math of Backpropagation** (Conceptual)
+    back: |
+      Backpropagation uses the chain rule to compute the gradient of the loss function with respect to each weight (`∂L/∂w`). This is done layer by layer, starting from the end.
+
+      ### Conceptual Steps for a single weight `wᵢ`:
+      1.  **Output Gradient**: Calculate the gradient of the loss with respect to the network's final output (`∂L/∂ŷ`). This is the starting point.
+      2.  **Activation Gradient**: Propagate the gradient backward through the last activation function to get the gradient with respect to the pre-activation output `z`.
+          `∂L/∂z = (∂L/∂ŷ) * (∂ŷ/∂z)` (where `∂ŷ/∂z` is the derivative of the activation function).
+      3.  **Weight Gradient**: Propagate the gradient backward through the weighted sum to get the gradient with respect to the weight `wᵢ`.
+          `∂L/∂wᵢ = (∂L/∂z) * (∂z/∂wᵢ)`
+
+      This process continues, reusing computed gradients, until the gradient for every weight in the network is found.
+
+  - front: |
+      # Calculating the **"Local Gradients"** for a Neuron
+    back: |
+      During backpropagation, we need the "local" derivatives of a neuron's operations. Consider a single neuron's pre-activation output:
+      `z = w₁x₁ + w₂x₂ + ... + b`
+
+      The partial derivatives of `z` with respect to its weights and bias are simple to compute:
+      - `∂z/∂w₁ = x₁` (The gradient with respect to a weight is just the input it was multiplied by).
+      - `∂z/∂w₂ = x₂`
+      - `∂z/∂b = 1`
+
+      These local gradients are then multiplied by the gradient coming from the next layer (`∂L/∂z`) via the chain rule to get the final gradient for each parameter.
+
+  - front: |
+      # **Derivatives** of Common Activation Functions
+    back: |
+      The derivative of the activation function is a critical part of the backpropagation chain rule calculation.
+
+      - **Sigmoid**: `σ'(z) = σ(z) * (1 - σ(z))`
+        - *Note*: The derivative can be calculated easily using the function's own output, which is computationally efficient.
+
+      - **Tanh**: `tanh'(z) = 1 - tanh(z)²`
+
+      - **ReLU**:
+        - `ReLU'(z) = 1` if `z > 0`
+        - `ReLU'(z) = 0` if `z < 0`
+        - The gradient is technically undefined at `z=0`, but in practice, it is set to 0.
+
+  - front: |
+      # Why use **Vectorization** and Matrix Operations?
+    back: |
+      Calculating the forward and backward passes neuron by neuron is extremely slow. **Vectorization** is the practice of performing these operations on entire layers at once using matrix and vector math.
+
+      - **Forward Pass**: The weighted sum for an entire layer can be expressed as one matrix multiplication:
+        `Z = XW + b`
+        - `X`: Matrix of inputs for the whole batch.
+        - `W`: The layer's weight matrix.
+        - `b`: The bias vector.
+
+      This is vastly more efficient because modern CPUs and GPUs are highly optimized for these matrix operations.
+
+  - front: |
+      # What is an **Activation Function** and why is it used?
+    back: |
+      An activation function is a mathematical function applied to the output of a neuron.
+
+      ### Purpose:
+      Its primary purpose is to introduce **non-linearity** into the network. Without non-linearity, a deep network would behave just like a single-layer linear model, unable to learn complex patterns.
+
+  - front: |
+      # **Sigmoid** vs. **Softmax** Activation Functions
+    back: |
+      Both are often used in the output layer, but for different classification tasks.
+
+      ## Sigmoid
+      - **Output**: Maps each input to a range of `[0, 1]`, independently. Outputs **do not** sum to 1.
+      - **Use Case**: **Binary** or **Multi-Label** Classification.
+
+      ## Softmax
+      - **Output**: Converts a vector into a **probability distribution**. Outputs are in the range `[0, 1]` and **sum to 1**.
+      - **Use Case**: **Multi-Class** Classification (mutually exclusive classes).
+
+  - front: |
+      # The **ReLU** Activation Function (Rectified Linear Unit)
+    back: |
+      ReLU is the most commonly used activation function in hidden layers.
+
+      ## Function: `f(x) = max(0, x)`
+      ### Pros:
+      - **Computationally efficient**.
+      - **Non-saturating (for positive values)**, which helps mitigate the vanishing gradient problem.
+
+      ### Con:
+      - The **"Dying ReLU" problem**: Neurons can become inactive and only output zero.
+
+  - front: |
+      # What are **Leaky ReLU** and its variants?
+    back: |
+      Leaky ReLU is an attempt to fix the "Dying ReLU" problem. Instead of being zero for negative inputs, it has a small, non-zero, positive slope (`α`).
+
+      ## Leaky ReLU Function:
+      `f(x) = x if x > 0`
+      `f(x) = αx if x <= 0`
+
+      This ensures that the neuron always has a non-zero gradient and can continue to learn.

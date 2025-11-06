@@ -1,0 +1,171 @@
+subject: Optimization
+description: Core concepts of gradient descent, popular optimizers, and the impact of hyperparameters.
+cards:
+  - front: |
+      # What is **Gradient Descent**?
+    back: |
+      Gradient Descent is an iterative optimization algorithm used to find the minimum of a function (typically a cost or loss function).
+
+      It works by taking repeated steps in the **opposite direction of the gradient** of the function at the current point. The gradient is the slope of the function, and moving against it means moving "downhill" towards a minimum.
+
+      ### Core Idea:
+      `new_weights = old_weights - learning_rate * gradient`
+
+  - front: |
+      # **Gradient Descent** in Python (Conceptual)
+    back: |
+      ```python
+      # Pseudocode for one iteration
+
+      learning_rate = 0.01
+      weights = # ... initial model weights
+
+      # 1. Make predictions with current weights
+      predictions = model(features, weights)
+
+      # 2. Calculate the loss (error)
+      loss = calculate_loss(predictions, true_labels)
+
+      # 3. Compute the gradient of the loss w.r.t weights
+      # This tells us the direction of steepest ascent
+      gradient = compute_gradient(loss, weights)
+
+      # 4. Update the weights by stepping downhill
+      weights = weights - learning_rate * gradient
+      ```
+
+  - front: |
+      # What are the three main types of **Gradient Descent**?
+    back: |
+      The types differ in how much data is used to compute the gradient for each weight update.
+
+      | Type | Gradient Calculation | Update Speed | Noise |
+      |---|---|---|---|
+      | **Batch GD** | Uses the **entire** training set. | Slow, computationally expensive. | Smooth, stable convergence. |
+      | **Stochastic GD (SGD)** | Uses **one** random training sample. | Fast, but high variance. | Very noisy updates, can help escape local minima. |
+      | **Mini-Batch GD**| Uses a **small batch** of samples (e.g., 32, 64).| A good balance of speed and stability.| Less noisy than SGD, more efficient than Batch. |
+
+      **Mini-Batch GD** is the most commonly used approach in deep learning.
+
+  - front: |
+      # What is the **Learning Rate** hyperparameter?
+    back: |
+      The learning rate (`α` or `eta`) is a hyperparameter that controls the **step size** at each iteration while moving toward a minimum of a loss function.
+
+      - **Too Small Learning Rate**: The model will learn very slowly, and training will take a long time. It may also get stuck in a local minimum.
+
+      - **Too Large Learning Rate**: The model may overshoot the minimum and fail to converge, with the loss potentially bouncing around or even diverging.
+
+      Finding a good learning rate is critical for successful training.
+
+  - front: |
+      # What is **Momentum** in optimization?
+    back: |
+      Momentum is a technique that helps accelerate Gradient Descent in the relevant direction and dampens oscillations.
+
+      It adds a fraction of the previous update vector to the current update vector. This causes the updates to build up "velocity" in a consistent direction and reduces the impact of noisy, inconsistent gradients.
+
+      ### Analogy:
+      Imagine a ball rolling down a hill. It builds up momentum and doesn't stop instantly, helping it roll over small bumps (local minima).
+
+  - front: |
+      # What is **Nesterov Accelerated Gradient (NAG)**?
+    back: |
+      Nesterov Accelerated Gradient (NAG) is an improvement on the standard momentum method.
+
+      Instead of calculating the gradient at the current position, it first makes a "lookahead" step in the direction of the accumulated momentum. It then calculates the gradient from that future position and uses it to make a correction.
+
+      This "smarter" approach prevents the algorithm from overshooting the minimum and makes it more responsive, often leading to faster convergence.
+
+  - front: |
+      # What is the **Adam** Optimizer?
+    back: |
+      Adam (Adaptive Moment Estimation) is a popular and effective optimization algorithm that combines the best ideas of two other methods:
+
+      1.  **Momentum**: It uses a moving average of the past gradients to accelerate convergence.
+      2.  **RMSprop**: It uses **adaptive learning rates**, maintaining a per-parameter learning rate that is adjusted based on the historical gradients for that parameter.
+
+      Because it adapts the learning rate for each weight, it often converges faster and requires less manual tuning of the initial learning rate than other optimizers.
+
+  - front: |
+      # What is the **RMSprop** Optimizer?
+    back: |
+      RMSprop (Root Mean Square Propagation) is an adaptive learning rate optimizer designed to resolve the diminishing learning rate issue of AdaGrad.
+
+      It adapts the learning rate for each parameter, dividing it by a moving average of the magnitudes of recent gradients for that weight.
+
+      ### Key Idea:
+      It uses an exponentially decaying average of squared gradients. This prevents the learning rate from shrinking to zero too quickly and allows the model to continue learning after many iterations. It is one of the core components of the Adam optimizer.
+
+  - front: |
+      # What is a **Learning Rate Scheduler**?
+    back: |
+      A Learning Rate Scheduler is a technique used to **adjust the learning rate** during training. Instead of keeping the learning rate constant, it is systematically changed according to a pre-defined schedule.
+
+      ### Common Strategy:
+      **Learning Rate Decay**. Start with a relatively high learning rate to converge quickly at the beginning of training, then gradually decrease it. This allows the model to make smaller, more refined steps as it gets closer to a minimum, preventing it from overshooting.
+
+      *Examples*: Step Decay, Cosine Annealing, Exponential Decay.
+
+  - front: |
+      # What is **Early Stopping**?
+    back: |
+      Early Stopping is a form of regularization used to prevent overfitting.
+
+      ### How it Works:
+      1.  Monitor the model's performance on a **validation set** during training.
+      2.  If the validation performance stops improving (or starts to get worse) for a certain number of consecutive epochs (known as "patience"), stop the training process.
+      3.  The model weights from the epoch with the best validation score are saved and used as the final model.
+
+      This prevents the model from continuing to train to the point where it begins to overfit the training data.
+
+  - front: |
+      # What are **Vanishing and Exploding Gradients**?
+    back: |
+      These are problems that occur during backpropagation in deep neural networks.
+
+      ## Vanishing Gradients
+      - **Problem**: The gradients of the loss function with respect to the weights in the early layers become extremely small.
+      - **Effect**: The weights of the early layers do not get updated effectively, and the network is unable to learn long-range dependencies. This is common with activation functions like sigmoid.
+
+      ## Exploding Gradients
+      - **Problem**: The gradients become extremely large.
+      - **Effect**: Leads to very large weight updates and numerical instability, causing the model's weights to become `NaN` and training to fail.
+
+      **Solutions**: Careful weight initialization, using non-saturating activation functions (like ReLU), batch normalization, and gradient clipping.
+
+  - front: |
+      # What is a **Loss Landscape**?
+    back: |
+      The loss landscape is a conceptual, high-dimensional surface where the "location" is defined by the model's weights and the "elevation" is the value of the loss function.
+
+      The goal of an optimizer is to navigate this landscape to find the lowest possible point (a global minimum).
+
+      ### Key Features:
+      - **Minima**: Valleys in the landscape. Optimizers seek these.
+      - **Sharp vs. Flat Minima**: Flat minima are generally preferred as they tend to generalize better to unseen data. Small batch sizes are thought to help find these.
+      - **Saddle Points**: Points that are a minimum along one dimension but a maximum along another, which can trap simple optimizers.
+
+  - front: |
+      # How does **Batch Size** affect the Bias-Variance Tradeoff?
+    back: |
+      Batch size affects the stability and generalization of the training process.
+
+      - **Large Batch Size**:
+        - **Effect**: The gradient calculation is more stable. The model tends to converge to **sharp minima**.
+        - **Tradeoff**: Sharp minima often have worse generalization performance, which can be seen as a form of **higher variance** on unseen data.
+
+      - **Small Batch Size**:
+        - **Effect**: The gradient calculation is very noisy. This noise acts as a regularizer.
+        - **Tradeoff**: The noise helps the optimizer find **flatter minima**. These minima tend to generalize better, leading to **lower variance**.
+
+  - front: |
+      # How does the **Learning Rate** affect the Bias-Variance Tradeoff?
+    back: |
+      The learning rate indirectly affects the bias-variance tradeoff by controlling how well the model converges.
+
+      - **Too High Learning Rate**: The model's weights may fail to converge. This leads to a suboptimal model that doesn't fit the data well, resulting in **high bias** (underfitting).
+
+      - **Appropriate Learning Rate**: Allows the model to converge properly. If the model architecture is complex, it can still overfit (**high variance**), but the optimization process itself is not the cause.
+
+      - **Too Low Learning Rate**: If training is stopped too early, the model may not have had time to learn the patterns, resulting in **high bias** (underfitting).

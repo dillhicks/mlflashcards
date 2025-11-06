@@ -1,0 +1,122 @@
+subject: Linear Models
+description: Core concepts of linear and logistic regression, regularization, and their underlying mechanics.
+cards:
+  - front: |
+      # What defines a **Linear Model**?
+    back: |
+      A linear model makes a prediction by computing a **weighted sum of the input features**, plus a constant called the **bias term** (or intercept).
+
+      The output is a linear function of the input features. The goal of training is to find the optimal values for these weights and the bias.
+
+      ### General Formula:
+      `ŷ = w₀ + w₁x₁ + w₂x₂ + ... + wₙxₙ`
+
+      - `ŷ`: The predicted value.
+      - `w₀`: The bias term (intercept).
+      - `w₁...wₙ`: The feature weights (or coefficients).
+      - `x₁...xₙ`: The input features.
+
+      This core formula is adapted for both regression and classification tasks.
+
+  - front: |
+      # What is the **Normal Equation** for Linear Regression?
+    back: |
+      The Normal Equation is an **analytical solution** for finding the optimal weights (`θ`) that minimize the cost function in a linear regression model. It computes the result directly without needing an iterative optimization process like Gradient Descent.
+
+      ## Formula:
+      `θ = (XᵀX)⁻¹ Xᵀy`
+
+      - `θ`: The vector of optimal weights (including the bias term).
+      - `X`: The feature matrix (with a column of ones added for the bias term).
+      - `Xᵀ`: The transpose of the feature matrix.
+      - `( ... )⁻¹`: The inverse of the matrix.
+      - `y`: The vector of target values.
+
+      ### Pros & Cons:
+      - **Pro**: No need to choose a learning rate or iterate. It's a direct computation.
+      - **Con**: Becomes computationally very slow and expensive as the number of features increases, due to the cost of inverting the `(XᵀX)` matrix (typically `O(n³)` complexity, where `n` is the number of features).
+
+  - front: |
+      # What is **Logistic Regression**?
+    back: |
+      Despite its name, Logistic Regression is a **linear model for binary classification**, not regression.
+
+      It estimates the probability that an instance belongs to a particular class (e.g., the probability of an email being spam).
+
+      ### How it works:
+      1.  It computes a weighted sum of the input features plus a bias term, just like linear regression.
+      2.  It then feeds this result into a **logistic (sigmoid) function**, which squashes the output value into a range between 0 and 1.
+      3.  This output is interpreted as a probability. A classification threshold (typically 0.5) is used to convert this probability into a binary class prediction (e.g., > 0.5 is class 1, < 0.5 is class 0).
+
+  - front: |
+      # What is the **Logistic (Sigmoid) Function**?
+    back: |
+      The Sigmoid function is a mathematical function that takes any real-valued number and maps it to a value between 0 and 1. It has an "S"-shaped curve.
+
+      ## Formula:
+      `σ(z) = 1 / (1 + e⁻ᶻ)`
+
+      - `z`: The input to the function (which is the output of the linear equation `w₀ + w₁x₁ + ...`).
+      - `e`: The base of the natural logarithm.
+
+      In logistic regression, this function's output is interpreted as the probability of the positive class (`P(y=1|X)`).
+
+  - front: |
+      # **Logistic vs. Linear Regression**: Key Differences
+    back: |
+      | Feature | Linear Regression | Logistic Regression |
+      |---|---|---|
+      | **Task** | **Regression** | **Classification** |
+      | **Output** | A continuous numerical value (e.g., 25.4, -100, 3141.5) | A probability between 0 and 1. |
+      | **Core Function** | Fits a straight line (`y = mx + b`) to the data. | Fits a linear equation to a **Sigmoid function** (`σ(mx+b)`). |
+      | **Use Case** | Predicting prices, temperatures, sales. | Spam detection, fraud detection, disease diagnosis. |
+      | **Cost Function**| Typically Mean Squared Error (MSE).| Typically Log Loss (Binary Cross-Entropy).|
+
+  - front: |
+      # How is the **Bias Term** (Intercept) selected in a linear model?
+    back: |
+      The bias term (`w₀` or `b`), also known as the intercept, is **not selected manually**. It is a **learnable parameter** that is found by the training algorithm, just like the feature weights.
+
+      ### Role of the Bias Term:
+      The bias term allows the model to have some baseline offset that is independent of the input features. Geometrically, it represents the value of the prediction when all input features are zero.
+
+      It shifts the decision boundary or regression line up or down on the y-axis, providing more flexibility to the model to fit the data. Without it, a regression line would be forced to pass through the origin (0,0).
+
+  - front: |
+      # **Ridge Regression (L2 Regularization)**
+
+      What is its purpose and how does it work?
+    back: |
+      Ridge Regression is a regularized version of linear regression that aims to **prevent overfitting** and handle **multicollinearity** (when features are highly correlated).
+
+      ## How it Works:
+      It adds a penalty term to the cost function that is equal to the **square of the magnitude** of the coefficients. This is the **L2 norm**.
+
+      ### Penalty Term:
+      `α * Σ(wᵢ)²`
+      - `α` (alpha) is the regularization hyperparameter that controls the strength of the penalty.
+      - `wᵢ` are the model's weights.
+
+      ### Effect:
+      - It forces the learning algorithm to keep the model weights as small as possible.
+      - It **shrinks** the coefficients towards zero but **never to exactly zero**.
+      - This reduces the model's variance at the cost of a slight increase in bias.
+
+  - front: |
+      # **Lasso Regression (L1 Regularization)**
+
+      What is its key feature and primary use case?
+    back: |
+      Lasso (Least Absolute Shrinkage and Selection Operator) Regression is another regularized version of linear regression.
+
+      ## How it Works:
+      It adds a penalty term to the cost function that is equal to the **absolute value** of the magnitude of the coefficients. This is the **L1 norm**.
+
+      ### Penalty Term:
+      `α * Σ|wᵢ|`
+      - `α` (alpha) controls the regularization strength.
+      - `wᵢ` are the model's weights.
+
+      ### Key Feature & Use Case:
+      - The key feature of Lasso is that it tends to shrink the coefficients of the least important features to **exactly zero**.
+      - This makes it very useful for **automatic feature selection**, as it effectively removes irrelevant features from the model, leading to a sparser and often more interpretable model.
