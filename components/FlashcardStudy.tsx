@@ -3,9 +3,12 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Flashcard from './Flashcard';
-import { Shuffle, RotateCcw, Moon, Sun } from 'lucide-react';
+import { Shuffle, RotateCcw, Moon, Sun, Eye } from 'lucide-react';
 import { useDarkMode } from '@/contexts/DarkModeContext';
 import { Flashcard as FlashcardType } from '@/lib/flashcardLoader';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
 
 interface FlashcardStudyProps {
   title: string;
@@ -28,6 +31,7 @@ export default function FlashcardStudy({
   const [isShuffled, setIsShuffled] = useState(false);
   const [displayCards, setDisplayCards] = useState<FlashcardType[]>([...cards]);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [showAllModal, setShowAllModal] = useState(false);
   const { isDarkMode, toggleDarkMode } = useDarkMode();
   const flashcardRef = useRef<HTMLDivElement>(null);
 
@@ -54,6 +58,10 @@ export default function FlashcardStudy({
     setShowCompletionModal(false);
   };
 
+  const closeShowAllModal = () => {
+    setShowAllModal(false);
+  };
+
   // Global keyboard event handler
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -68,6 +76,13 @@ export default function FlashcardStudy({
           closeModal();
           return;
         }
+      }
+
+      // Close show all modal with Escape
+      if (showAllModal && e.key === 'Escape') {
+        e.preventDefault();
+        closeShowAllModal();
+        return;
       }
 
       if (e.key === 'ArrowRight') {
@@ -88,7 +103,7 @@ export default function FlashcardStudy({
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [currentCardIndex, displayCards.length, showCompletionModal]);
+  }, [currentCardIndex, displayCards.length, showCompletionModal, showAllModal]);
 
   const shuffleArray = <T,>(array: T[]): T[] => {
     const newArray = [...array];
@@ -208,6 +223,18 @@ export default function FlashcardStudy({
           </button>
 
           <button
+            onClick={() => setShowAllModal(true)}
+            className={`p-3 rounded-lg transition-colors ${
+              isDarkMode
+                ? 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+            }`}
+            aria-label="Show all cards"
+          >
+            <Eye size={20} />
+          </button>
+
+          <button
             onClick={handleReset}
             className="p-3 bg-red-500 hover:bg-red-600 rounded-lg text-white transition-colors"
             aria-label="Reset cards"
@@ -268,6 +295,139 @@ export default function FlashcardStudy({
                 >
                   {backText === "Back" ? "Choose Another" : backText}
                 </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Show All Modal */}
+      {showAllModal && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={closeShowAllModal}
+        >
+          <div
+            className={`relative w-full max-w-4xl h-5/6 max-h-[800px] rounded-xl shadow-2xl ${isDarkMode ? 'bg-gray-800' : 'bg-white'} flex flex-col`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className={`flex items-center justify-between p-6 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+              <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                All Flashcards ({displayCards.length})
+              </h2>
+              <button
+                onClick={closeShowAllModal}
+                className={`p-2 rounded-lg transition-colors ${
+                  isDarkMode
+                    ? 'hover:bg-gray-700 text-gray-400 hover:text-gray-200'
+                    : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'
+                }`}
+                aria-label="Close modal"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {displayCards.map((card, index) => (
+                  <div
+                    key={index}
+                    className={`rounded-lg p-4 border ${isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
+                  >
+                    <div className={`text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-500'}`}>
+                      Card {index + 1}
+                    </div>
+                    <div className={`mb-3 p-3 rounded ${isDarkMode ? 'bg-gray-800' : 'bg-white'} border ${isDarkMode ? 'border-gray-600' : 'border-gray-200'}`}>
+                      <div className={`text-sm font-semibold mb-1 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                        Front:
+                      </div>
+                      <div className={`${isDarkMode ? 'text-gray-200' : 'text-gray-800'} text-sm leading-relaxed`}>
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm, remarkBreaks]}
+                          components={{
+                            h1: ({children}) => <h1 className="text-base font-bold mb-1">{children}</h1>,
+                            h2: ({children}) => <h2 className="text-sm font-semibold mb-1">{children}</h2>,
+                            h3: ({children}) => <h3 className="text-sm font-semibold mb-1">{children}</h3>,
+                            p: ({children}) => <p className="mb-1">{children}</p>,
+                            ul: ({children}) => <ul className="list-disc list-inside mb-1 text-left">{children}</ul>,
+                            ol: ({children}) => <ol className="list-decimal list-inside mb-1 text-left">{children}</ol>,
+                            li: ({children}) => <li className="mb-0.5">{children}</li>,
+                            code: ({className, children}) => {
+                              const isInline = !className;
+                              return isInline
+                                ? <code className={`px-1 py-0.5 rounded text-xs font-mono ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>{children}</code>
+                                : <code className={`block p-1 rounded text-xs font-mono overflow-x-auto ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>{children}</code>;
+                            },
+                            pre: ({children}) => <pre className={`p-1 rounded text-xs overflow-x-auto mb-1 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>{children}</pre>,
+                            blockquote: ({children}) => <blockquote className={`border-l-4 pl-2 italic mb-1 ${isDarkMode ? 'border-gray-600 text-gray-300' : 'border-gray-300 text-gray-600'}`}>{children}</blockquote>,
+                            strong: ({children}) => <strong className="font-semibold">{children}</strong>,
+                            em: ({children}) => <em className="italic">{children}</em>,
+                            a: ({href, children}) => <a href={href} className="text-blue-500 hover:text-blue-400 underline" target="_blank" rel="noopener noreferrer">{children}</a>,
+                            table: ({children}) => <table className="min-w-full border-collapse border border-gray-300 mb-1 text-xs">{children}</table>,
+                            thead: ({children}) => <thead className={isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}>{children}</thead>,
+                            th: ({children}) => <th className="border border-gray-300 px-1 py-0.5 text-left font-semibold text-xs">{children}</th>,
+                            td: ({children}) => <td className="border border-gray-300 px-1 py-0.5 text-xs">{children}</td>,
+                          }}
+                        >
+                          {card.front}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                    <div className={`p-3 rounded ${isDarkMode ? 'bg-gray-800' : 'bg-white'} border ${isDarkMode ? 'border-gray-600' : 'border-gray-200'}`}>
+                      <div className={`text-sm font-semibold mb-1 ${isDarkMode ? 'text-green-400' : 'text-green-600'}`}>
+                        Back:
+                      </div>
+                      <div className={`${isDarkMode ? 'text-gray-200' : 'text-gray-800'} text-sm leading-relaxed`}>
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm, remarkBreaks]}
+                          components={{
+                            h1: ({children}) => <h1 className="text-base font-bold mb-1">{children}</h1>,
+                            h2: ({children}) => <h2 className="text-sm font-semibold mb-1">{children}</h2>,
+                            h3: ({children}) => <h3 className="text-sm font-semibold mb-1">{children}</h3>,
+                            p: ({children}) => <p className="mb-1">{children}</p>,
+                            ul: ({children}) => <ul className="list-disc list-inside mb-1 text-left">{children}</ul>,
+                            ol: ({children}) => <ol className="list-decimal list-inside mb-1 text-left">{children}</ol>,
+                            li: ({children}) => <li className="mb-0.5">{children}</li>,
+                            code: ({className, children}) => {
+                              const isInline = !className;
+                              return isInline
+                                ? <code className={`px-1 py-0.5 rounded text-xs font-mono ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>{children}</code>
+                                : <code className={`block p-1 rounded text-xs font-mono overflow-x-auto ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>{children}</code>;
+                            },
+                            pre: ({children}) => <pre className={`p-1 rounded text-xs overflow-x-auto mb-1 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>{children}</pre>,
+                            blockquote: ({children}) => <blockquote className={`border-l-4 pl-2 italic mb-1 ${isDarkMode ? 'border-gray-600 text-gray-300' : 'border-gray-300 text-gray-600'}`}>{children}</blockquote>,
+                            strong: ({children}) => <strong className="font-semibold">{children}</strong>,
+                            em: ({children}) => <em className="italic">{children}</em>,
+                            a: ({href, children}) => <a href={href} className="text-blue-500 hover:text-blue-400 underline" target="_blank" rel="noopener noreferrer">{children}</a>,
+                            table: ({children}) => <table className="min-w-full border-collapse border border-gray-300 mb-1 text-xs">{children}</table>,
+                            thead: ({children}) => <thead className={isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}>{children}</thead>,
+                            th: ({children}) => <th className="border border-gray-300 px-1 py-0.5 text-left font-semibold text-xs">{children}</th>,
+                            td: ({children}) => <td className="border border-gray-300 px-1 py-0.5 text-xs">{children}</td>,
+                          }}
+                        >
+                          {card.back}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className={`p-6 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+              <div className="flex justify-center">
+                <button
+                  onClick={closeShowAllModal}
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                >
+                  Back to Flashcards
+                </button>
               </div>
             </div>
           </div>

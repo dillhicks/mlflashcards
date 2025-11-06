@@ -1,18 +1,7 @@
 # ML Flashcards
 
-An interactive flashcard application built with Next.js and React for learning machine learning concepts.
+A collection of my flashcards used to study subjects within ML.
 
-## Features
-
-- 📚 **Subject-based Learning**: Organized flashcards by subjects (ML Basics, Deep Learning, etc.)
-- 🔄 **Interactive Flashcards**: Click to flip cards and reveal answers
-- 🔀 **Study Modes**: Sequential and shuffled card ordering
-- ⌨️ **Keyboard Navigation**: Use arrow keys and spacebar for navigation
-- 📊 **Progress Tracking**: Visual progress bar and card counter
-- 📱 **Responsive Design**: Works seamlessly on desktop and mobile devices
-- ⚡ **Fast Performance**: Built with Next.js 15 and optimized for speed
-
-## Getting Started
 
 ### Prerequisites
 
@@ -115,8 +104,3 @@ cards:
 - Styles use Tailwind CSS classes
 - Animations are handled with Framer Motion
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme).
-
-Check out the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
