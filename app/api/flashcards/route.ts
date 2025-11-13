@@ -11,7 +11,7 @@ function sortSubjects(subjects: Subject[]): Subject[] {
 
     if (aHasPlace && bHasPlace) {
       // Both have place values, sort by place (ascending)
-      return a.place - b.place;
+      return a.place! - b.place!;
     }
     if (aHasPlace && !bHasPlace) {
       // A has place, B doesn't - A comes first
@@ -34,7 +34,7 @@ function sortCategories(categories: Category[]): Category[] {
 
     if (aHasPlace && bHasPlace) {
       // Both have place values, sort by place (ascending)
-      return a.place - b.place;
+      return a.place! - b.place!;
     }
     if (aHasPlace && !bHasPlace) {
       // A has place, B doesn't - A comes first
