@@ -1,5 +1,6 @@
 subject: Fine-Tuning
 description: Concepts and techniques for adapting Large Language Models to specific tasks and styles.
+place: 3
 cards:
   - front: |
       # **Why Fine-Tune** instead of just using Prompt Engineering or RAG?
