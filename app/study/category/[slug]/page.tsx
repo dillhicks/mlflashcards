@@ -3,21 +3,21 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import FlashcardStudy from '@/components/FlashcardStudy';
-import { loadCategoryByName, Flashcard as FlashcardType } from '@/lib/flashcardLoader';
+import { loadCategoryByNameWithTitle, Flashcard as FlashcardType } from '@/lib/flashcardLoader';
 
 export default function StudyCategoryPage() {
   const params = useParams();
   const router = useRouter();
   const categorySlug = params.slug as string;
 
-  const [subjects, setSubjects] = useState<{ subject: string; description: string; cards: FlashcardType[] }[]>([]);
+  const [categoryData, setCategoryData] = useState<{categoryName: string; subjects: { subject: string; description: string; cards: FlashcardType[] }[]} | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchFlashcards = async () => {
       try {
-        const data = await loadCategoryByName(categorySlug);
-        setSubjects(data);
+        const data = await loadCategoryByNameWithTitle(categorySlug);
+        setCategoryData(data);
       } catch (error) {
         console.error('Error fetching category flashcards:', error);
         router.push('/');
@@ -39,7 +39,7 @@ export default function StudyCategoryPage() {
     );
   }
 
-  if (subjects.length === 0) {
+  if (!categoryData) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900">
         <div className="text-center">
@@ -52,7 +52,7 @@ export default function StudyCategoryPage() {
     );
   }
 
-  const categoryName = categorySlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const { categoryName, subjects } = categoryData;
   const allCards = subjects.flatMap(subject => subject.cards);
 
   if (allCards.length === 0) {

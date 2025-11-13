@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import FlashcardStudy from '@/components/FlashcardStudy';
-import { loadSubjectByName, Flashcard as FlashcardType } from '@/lib/flashcardLoader';
+import { loadSubjectByCategoryAndSubject, Flashcard as FlashcardType } from '@/lib/flashcardLoader';
 
-export default function SubjectPage() {
+export default function CategorySubjectPage() {
   const params = useParams();
   const router = useRouter();
+  const category = params.category as string;
   const slug = params.slug as string;
 
   const [subject, setSubject] = useState<{ subject: string; description: string; cards: FlashcardType[] } | null>(null);
@@ -16,7 +17,7 @@ export default function SubjectPage() {
   useEffect(() => {
     const fetchSubject = async () => {
       try {
-        const foundSubject = await loadSubjectByName(slug);
+        const foundSubject = await loadSubjectByCategoryAndSubject(category, slug);
 
         if (foundSubject) {
           setSubject(foundSubject);
@@ -32,7 +33,7 @@ export default function SubjectPage() {
     };
 
     fetchSubject();
-  }, [slug, router]);
+  }, [category, slug, router]);
 
   if (loading) {
     return (

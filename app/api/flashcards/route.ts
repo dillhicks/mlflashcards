@@ -178,8 +178,11 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Category not found' }, { status: 404 });
       }
 
-      // Return subjects for this category
-      return NextResponse.json(requestedCategory.subjects);
+      // Return subjects for this category with original category name
+      return NextResponse.json({
+        categoryName: requestedCategory.category,
+        subjects: requestedCategory.subjects
+      });
     }
 
     // Handle "all" mode

@@ -123,8 +123,8 @@ export default function Home() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {category.subjects?.filter(subject => subject && subject.subject)?.map((subject) => (
                   <Link
-                    key={subject.subject}
-                    href={`/subject/${encodeURIComponent(subject.subject.toLowerCase().replace(/\s+/g, '-'))}`}
+                    key={`${category.category}-${subject.subject}`}
+                    href={`/subject/${encodeURIComponent(category.category.toLowerCase().replace(/\s+/g, '-'))}/${encodeURIComponent(subject.subject.toLowerCase().replace(/\s+/g, '-'))}`}
                     className="group"
                   >
                     <div className={`rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 h-full border cursor-pointer ${

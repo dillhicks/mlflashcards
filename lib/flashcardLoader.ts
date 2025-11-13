@@ -57,7 +57,45 @@ export async function loadCategoryByName(categoryName: string): Promise<Subject[
       throw new Error(data.error);
     }
 
+    // Handle new response format with categoryName
+    if (data && typeof data === 'object' && 'subjects' in data) {
+      return data.subjects;
+    }
+
+    // Fallback for old format (backward compatibility)
     return data;
+  } catch (error) {
+    console.error('Error loading category flashcards:', error);
+    throw error;
+  }
+}
+
+export async function loadCategoryByNameWithTitle(categoryName: string): Promise<{categoryName: string; subjects: Subject[]}> {
+  try {
+    const response = await fetch(`/api/flashcards?category=${encodeURIComponent(categoryName)}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch category flashcards: ${response.statusText}`);
+    }
+    const data = await response.json();
+
+    // Check if the response contains an error message
+    if (data && typeof data === 'object' && 'error' in data) {
+      throw new Error(data.error);
+    }
+
+    // Handle new response format with categoryName
+    if (data && typeof data === 'object' && 'categoryName' in data && 'subjects' in data) {
+      return {
+        categoryName: data.categoryName,
+        subjects: data.subjects
+      };
+    }
+
+    // Fallback for old format - construct from slug
+    return {
+      categoryName: categoryName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      subjects: data
+    };
   } catch (error) {
     console.error('Error loading category flashcards:', error);
     throw error;
@@ -88,4 +126,36 @@ export async function loadSubjectByName(subjectName: string): Promise<Subject | 
   return subjects.find(subject =>
     subject.subject.toLowerCase().replace(/\s+/g, '-') === subjectName.toLowerCase()
   ) || null;
+}
+
+export async function loadSubjectByCategoryAndSubject(categoryName: string, subjectName: string): Promise<Subject | null> {
+  try {
+    const response = await fetch(`/api/flashcards?category=${encodeURIComponent(categoryName)}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch category flashcards: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    // Check if the response contains an error message
+    if (data && typeof data === 'object' && 'error' in data) {
+      throw new Error((data as any).error);
+    }
+
+    // Handle new response format with categoryName and subjects
+    let subjects: Subject[];
+    if (data && typeof data === 'object' && 'subjects' in data) {
+      subjects = data.subjects;
+    } else {
+      // Fallback for old format (backward compatibility)
+      subjects = data;
+    }
+
+    return subjects.find(subject =>
+      subject.subject.toLowerCase().replace(/\s+/g, '-') === subjectName.toLowerCase()
+    ) || null;
+  } catch (error) {
+    console.error('Error loading subject by category and name:', error);
+    return null;
+  }
 }
