@@ -1,0 +1,230 @@
+subject: LLM Fine-Tuning
+description: Concepts and techniques for adapting Large Language Models to specific tasks and styles.
+cards:
+  - front: |
+      # What is **Fine-Tuning** an LLM?
+    back: |
+      Fine-tuning is the process of taking a pre-trained Large Language Model and continuing its training on a smaller, task-specific dataset.
+
+      This process adjusts the model's internal weights to specialize its knowledge and behavior for a new, narrower domain or task, such as matching a specific writing style or performing a new function like code completion.
+
+  - front: |
+      # **Why Fine-Tune** instead of just using Prompt Engineering or RAG?
+    back: |
+      Fine-tuning is used to teach a model a new **skill, style, or behavior**, which is fundamentally different from providing it with new knowledge.
+
+      - **Use Fine-Tuning When**: You need to change the model's core behavior, such as its tone of voice, the format of its output, or a complex new task that is hard to explain in a prompt.
+      - **Use RAG When**: You need the model to use up-to-date or private knowledge. RAG provides facts, while fine-tuning teaches skills.
+      - **Use Prompt Engineering When**: The task is simple enough to be described with in-context examples and clear instructions.
+
+  - front: |
+      # **Full Fine-Tuning** vs. **PEFT**
+    back: |
+      These are the two main approaches to fine-tuning.
+
+      ## Full Fine-Tuning
+      - **How it Works**: Updates **all the weights** of the pre-trained model.
+      - **Pros**: Can lead to the highest possible performance for the new task.
+      - **Cons**: Extremely computationally expensive, requires massive amounts of VRAM, and results in a full-sized, separate model for every new task.
+
+      ## PEFT (Parameter-Efficient Fine-Tuning)
+      - **How it Works**: Freezes the vast majority of the original LLM's weights and only trains a small number of new or extra parameters.
+      - **Pros**: Drastically reduces computational and memory costs, is much faster, and results in small, portable "adapter" weights.
+      - **Cons**: May result in slightly lower performance than full fine-tuning on some very complex tasks.
+
+  - front: |
+      # What is **LoRA (Low-Rank Adaptation)**?
+    back: |
+      LoRA is the most popular PEFT technique.
+
+      ### Core Idea:
+      Instead of updating the large, original weight matrices of the model, LoRA injects **two smaller, low-rank matrices** next to them. Only these small matrices are trained.
+
+      During inference, the weights from these two small matrices are multiplied together and added to the original, frozen weights. This allows the model to adapt to a new task using only a tiny fraction (e.g., <1%) of the original number of parameters.
+
+  - front: |
+      # How would you fine-tune an LLM to match a specific **Tone and Style**?
+    back: |
+      To fine-tune for a specific tone (e.g., "formal and academic" or "witty and sarcastic"), you need to create a high-quality dataset of **examples that embody that style**.
+
+      ### Dataset Format:
+      The dataset should be a collection of prompt-completion pairs.
+      - **Prompt**: A question or instruction that the base model could answer.
+      - **Completion**: The desired answer, written *exactly* in the target tone and style.
+
+      *Example:*
+      ```json
+      {
+        "prompt": "Explain the concept of photosynthesis.",
+        "completion": "Photosynthesis is the elegant metabolic process wherein green plants and certain other organisms transform light energy into chemical energy, sequestering carbon dioxide in the process..."
+      }
+      ```
+      With enough high-quality examples, the model will learn to adopt this style for any new prompt.
+
+  - front: |
+      # How would you fine-tune an LLM for **Fill-in-the-Middle (FIM) Coding**?
+    back: |
+      Fill-in-the-Middle is a specialized task where the model is trained to complete code, given a prefix and a suffix. This requires a specific dataset format and special tokens.
+
+      ### FIM Dataset Format:
+      The training data is formatted with three parts, often separated by special tokens:
+      1.  **Prefix**: The code that comes before the missing part.
+      2.  **Suffix**: The code that comes after the missing part.
+      3.  **Middle**: The code that should be generated to fill the gap.
+
+      The model is then trained to predict the `Middle` part when given the `Prefix` and `Suffix`.
+
+      *Example using special tokens:*
+      `<PRE>def get_user(id):<SUF>    return user<MID>    user = db.query(id)`
+
+  - front: |
+      # What is **Instruction Fine-Tuning** (or "Instruction Following")?
+    back: |
+      Instruction fine-tuning is a critical step that makes a base LLM (which is just a text-completion engine) into a useful, instruction-following assistant like ChatGPT.
+
+      ### How it Works:
+      The model is fine-tuned on a large and diverse dataset of instructions and high-quality responses. The dataset contains a wide variety of tasks, such as question answering, summarization, creative writing, and classification.
+
+      This process doesn't teach the model new knowledge, but rather teaches it the **format of how to respond to user requests**.
+
+  - front: |
+      # What are the key elements of a good **Fine-Tuning Dataset**?
+    back: |
+      The quality of your dataset is the single most important factor in a successful fine-tuning project.
+
+      ### Key Elements:
+      1.  **High Quality**: The examples must be accurate, well-written, and perfectly reflect the desired output. Garbage in, garbage out.
+      2.  **Consistency**: The format, style, and tone of the examples should be consistent throughout the dataset.
+      3.  **Diversity**: The prompts should cover a wide range of topics and phrasing that you expect the model to handle in production.
+      4.  **Sufficient Quantity**: While PEFT requires less data than full fine-tuning, you still typically need at least a few hundred to a few thousand high-quality examples.
+
+  - front: |
+      # What is **Catastrophic Forgetting**?
+    back: |
+      Catastrophic forgetting is a problem in full fine-tuning where the model **forgets the general knowledge** it learned during pre-training as it adapts to the new, narrow dataset.
+
+      By updating all of its weights to specialize on the new task, the model can lose its ability to perform other, more general tasks that it was previously capable of.
+
+  - front: |
+      # How does **PEFT** help prevent Catastrophic Forgetting?
+    back: |
+      PEFT is an effective solution to catastrophic forgetting because it **freezes the original weights** of the pre-trained model.
+
+      Since the vast majority of the model's parameters are not changed during PEFT, the model's core, general knowledge remains intact. The new, trainable "adapter" weights (like LoRA) learn the specifics of the new task without overwriting the model's original capabilities.
+
+  - front: |
+      # How do you **evaluate** a fine-tuned model?
+    back: |
+      Evaluation is a multi-step process involving both automated metrics and human review.
+
+      1.  **Holdout/Test Set**: Before training, set aside a portion of your dataset that the model will never see. Use this to get an objective measure of performance.
+      2.  **Quantitative Metrics**: For classification or structured tasks, you can use metrics like Accuracy, F1-Score, or BLEU/ROUGE for summarization.
+      3.  **Qualitative Review / Human Evaluation**: This is often the most important step. Have human reviewers interact with the model on a wide range of prompts to assess if it has truly learned the desired style, tone, and behavior. This is crucial for evaluating subjective qualities.
+  - front: |
+      # What does the data look like for **Instruction Fine-Tuning**?
+    back: |
+      Instruction fine-tuning data is typically structured in a **conversational format**, often as a list of messages. Each message has a `role` and `content`. This teaches the model how to act as a helpful assistant.
+
+      The three main roles are:
+      - **`system`**: Sets the context, persona, or rules for the model (e.g., "You are a helpful programming assistant.").
+      - **`user`**: The prompt or question from the user.
+      - **`assistant`**: The ideal, high-quality response that the model should learn to generate.
+
+      ### Example JSON format:
+      ```json
+      {
+        "messages": [
+          { "role": "system", "content": "You are a Python expert who provides concise code examples." },
+          { "role": "user", "content": "How do I read a CSV file into a pandas DataFrame?" },
+          { "role": "assistant", "content": "You can use the `read_csv` function from the pandas library.\n\n```python\nimport pandas as pd\n\ndf = pd.read_csv('your_file.csv')\nprint(df.head())\n```" }
+        ]
+      }
+      ```
+
+  - front: |
+      # What is **QLoRA** and how does it improve on LoRA?
+    back: |
+      QLoRA (Quantized Low-Rank Adaptation) is an even more memory-efficient version of LoRA. It makes fine-tuning large models accessible on consumer-grade hardware (like a single GPU).
+
+      It introduces two main innovations:
+      1.  **4-bit NormalFloat (NF4)**: A new, theoretically optimal data type for quantizing the pre-trained model's weights to 4-bit precision. This drastically reduces the memory footprint of the base model.
+      2.  **Double Quantization**: A technique to further reduce the memory overhead by quantizing the quantization constants themselves.
+
+      In short, QLoRA allows you to fine-tune a **4-bit quantized base model** with the standard 16-bit LoRA adapters, achieving performance very close to full 16-bit fine-tuning with a fraction of the VRAM.
+
+  - front: |
+      # What are the key **hyperparameters** in a fine-tuning job?
+    back: |
+      Several key hyperparameters control the fine-tuning process:
+
+      - **Learning Rate**: The step size for weight updates. For fine-tuning, this is typically very small (e.g., `2e-5`, `3e-4`). A learning rate scheduler is often used to decay it over time.
+
+      - **Epochs**: The number of times the model will see the entire training dataset. For fine-tuning, you typically only need a few epochs (often just **1-3**). Too many epochs will lead to overfitting.
+
+      - **Batch Size**: The number of training examples processed in a single iteration. This is often limited by the available GPU memory. A smaller batch size introduces more noise, which can have a slight regularizing effect.
+
+  - front: |
+      # What does it mean to **merge LoRA adapters**?
+    back: |
+      After a PEFT fine-tuning process like LoRA, you have two separate components: the original, large, frozen base model and the small, new "adapter" weights.
+
+      **Merging** is the process of mathematically combining the adapter weights directly into the base model's weights to produce a new, single, fine-tuned model.
+
+      ### Why Merge?
+      - **Deployment Simplicity**: You can deploy a single model file instead of a base model plus separate adapters.
+      - **Eliminate Latency**: While the latency from LoRA is very small, merging the weights removes it entirely, making inference as fast as the base model.
+
+  - front: |
+      # What are **Prompt Tuning** and **Prefix Tuning**?
+    back: |
+      These are even more parameter-efficient PEFT methods than LoRA.
+
+      ## Prompt Tuning
+      - **How it Works**: It freezes the entire LLM and only learns a small set of special "soft prompt" tokens. These learned tokens (which are just vectors) are prepended to the user's input to steer the model's output for a specific task.
+      - **Tradeoff**: Very parameter-efficient (only a few thousand trainable parameters) but generally less powerful than LoRA.
+
+      ## Prefix Tuning
+      - **How it Works**: Similar to Prompt Tuning, but instead of just prepending a learned vector to the input, it prepends a learned prefix to the hidden states of **every layer** in the Transformer. This gives the model more fine-grained control over its behavior.
+
+  - front: |
+      # Provide a quick guide: **When should I use Prompting vs. RAG vs. Fine-Tuning?**
+    back: |
+      Choose the right technique based on your goal:
+
+      - **Use Prompt Engineering if...**
+        - The task is simple and can be well-described with instructions and a few examples (few-shot learning).
+        - You don't need the model to learn a new style or format, just to follow directions.
+        - Cost and speed are primary concerns.
+
+      - **Use RAG if...**
+        - The primary goal is to **reduce factual hallucination**.
+        - The model needs access to **up-to-date, external, or private knowledge**.
+        - You need to provide **citations** or verifiable sources for the model's answers.
+
+      - **Use Fine-Tuning if...**
+        - The primary goal is to change the **model's behavior, style, or format**.
+        - You need to teach the model a complex new skill that is difficult to explain in a prompt.
+        - The task relies on many subtle examples that define a new pattern.
+
+  - front: |
+      # What are the best practices for **sourcing and cleaning data** for fine-tuning?
+    back: |
+      The success of fine-tuning is almost entirely dependent on the dataset. The mantra is **Quality over Quantity**.
+
+      1.  **Define the Goal Clearly**: What specific behavior are you trying to teach? This will guide your data collection.
+      2.  **Collect or Generate Data**: You can use existing company data, public datasets, or generate **synthetic data** using a more powerful LLM (like GPT-4) to create high-quality examples.
+      3.  **Filter for Quality**: Be ruthless. Remove any examples that are poorly written, factually incorrect, or do not perfectly match the desired format and style. It is better to have 500 perfect examples than 5,000 mediocre ones.
+      4.  **Ensure Consistent Formatting**: Make sure all your prompt-completion pairs follow the exact same structure.
+      5.  **Check for PII and Bias**: Sanitize your data to remove Personally Identifiable Information and review it for any inherent biases you don't want the model to learn.
+
+  - front: |
+      # What is the **LLM-as-a-Judge** evaluation method?
+    back: |
+      LLM-as-a-Judge is a modern technique for evaluating the quality of a fine-tuned model's output, especially for subjective tasks where metrics like accuracy don't apply.
+
+      ### How it Works:
+      1.  You provide a powerful, external LLM (like GPT-4 or Claude 3) with a prompt.
+      2.  You then provide the output from your fine-tuned model.
+      3.  Finally, you provide a rubric or a set of questions (e.g., "On a scale of 1-10, how well does this response match the requested witty tone?").
+
+      The judge LLM then scores the response. This is a scalable and often cheaper alternative to large-scale human evaluation.

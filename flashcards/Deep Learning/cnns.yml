@@ -1,0 +1,155 @@
+subject: Convolutional Neural Networks
+description: Core architectural concepts, components, and operations in CNNs.
+cards:
+  - front: |
+      # What is the general **dataflow** through a typical CNN for image classification?
+    back: |
+      The data flows through a sequence of layers that progressively extract more complex features.
+
+      1.  **Input Layer**: Holds the raw pixel values of the image (e.g., `32x32x3`).
+      2.  **Convolutional Layer**: A filter slides over the input to create a feature map, detecting features like edges or corners.
+      3.  **Activation Function (ReLU)**: Applied to the feature map to introduce non-linearity.
+      4.  **Pooling Layer**: Downsamples the feature map, reducing its dimensions and making features more robust to position.
+      5.  **Repeat**: Steps 2-4 are repeated. Deeper layers learn more complex patterns from the features of earlier layers.
+      6.  **Flatten Layer**: The final 2D feature maps are unrolled into a single long 1D vector.
+      7.  **Fully Connected (Dense) Layer(s)**: Performs the final classification based on the extracted features.
+      8.  **Output Layer**: Uses a Softmax or Sigmoid function to produce the final class probabilities.
+
+  - front: |
+      # What is a **Filter (Kernel)** in a Convolutional Layer?
+    back: |
+      A filter is a small matrix of **learnable weights** (e.g., `3x3` or `5x5`). Its purpose is to act as a **feature detector**.
+
+      The filter slides (convolves) over the input data. A high activation occurs when the feature it is designed to detect (like a vertical edge, a specific color pattern, or a corner) is present in that part of the input. The network learns the optimal values for these filter weights during the training process through backpropagation.
+
+  - front: |
+      # What is **Padding** in a CNN and why is it used?
+    back: |
+      Padding is the process of adding extra pixels (usually with a value of zero) around the border of an input volume before the convolution operation.
+
+      It serves two main purposes:
+      1.  **To Control Output Size**: It allows us to control the spatial dimensions of the output feature map. Without padding, the volume would shrink with every convolutional layer.
+      2.  **To Preserve Edge Information**: It ensures the filter can be properly centered on the pixels at the edges of the image, giving them more influence on the output.
+
+  - front: |
+      # What is **Stride** in a CNN and what is its effect?
+    back: |
+      Stride is the number of pixels the filter slides over the input matrix at a time.
+
+      - A stride of `1` means the filter moves one pixel at a time.
+      - A stride of `2` means the filter moves two pixels at a time, skipping every other pixel.
+
+      The primary effect of a stride greater than 1 is **downsampling**. It produces a spatially smaller output feature map, which reduces the number of computations and the parameters in the network.
+
+  - front: |
+      # How do you calculate the **output size** of a Convolutional Layer?
+    back: |
+      The spatial dimensions (Height and Width) of the output feature map can be calculated using the following formula:
+
+      ## Formula:
+      `Output_size = ( (W - K + 2P) / S ) + 1`
+
+      Where:
+      - `W`: The width/height of the input volume.
+      - `K`: The kernel (filter) size.
+      - `P`: The amount of padding.
+      - `S`: The stride.
+
+  - front: |
+      # What is **"Valid"** vs. **"Same"** Padding?
+    back: |
+      These are two common padding strategies found in deep learning frameworks.
+
+      ## "Valid" Padding
+      - **Meaning**: No padding is applied (`P=0`).
+      - **Effect**: The output feature map will be **smaller** than the input. The filter is only applied to "valid" positions where it fully overlaps with the input.
+
+      ## "Same" Padding
+      - **Meaning**: Padding is automatically added so that the output feature map has the **same spatial dimensions** as the input (assuming a stride of 1).
+      - **Effect**: This is useful for building deep networks, as it prevents the spatial dimensions from shrinking with every layer.
+
+  - front: |
+      # **Max Pooling** vs. **Average Pooling**
+    back: |
+      Pooling layers are used to **downsample** feature maps, reducing their spatial dimensions and making the network more invariant to small translations.
+
+      ## Max Pooling
+      - **How it Works**: Slides a window over the feature map and takes the **maximum** value from each region.
+      - **Effect**: It is more effective at capturing the most prominent features (the strongest activations) in a region. It is the most commonly used type of pooling.
+
+      ## Average Pooling
+      - **How it Works**: Takes the **average** of all values in the pooling window.
+      - **Effect**: It smooths out the feature map and captures the average presence of a feature.
+
+  - front: |
+      # **1D** vs. **2D** vs. **3D** CNNs
+    back: |
+      The "D" refers to the number of dimensions the convolutional filter slides along.
+
+      ## 1D CNN
+      - **Application**: Analyzing sequences or time-series data (e.g., text, audio signals). The kernel slides along **one dimension**.
+
+      ## 2D CNN
+      - **Application**: The most common type, used for analyzing images. The kernel slides along **two dimensions** (height and width).
+      - **RGB Photos**: An RGB image (`Height x Width x 3`) is processed by a 2D CNN. The 3 color channels are treated as the **depth** of the input volume. The filter itself must have a matching depth (e.g., `5x5x3`) to process all channels at once.
+
+      ## 3D CNN
+      - **Application**: Analyzing volumetric data (medical scans) or videos. The kernel slides along **three dimensions** (e.g., height, width, and depth/time).
+
+  - front: |
+      # What is a **Transposed Convolution** (or "Deconvolution")?
+    back: |
+      A Transposed Convolution is an operation that **upsamples** a feature map, increasing its spatial dimensions. It is often mistakenly called a "deconvolution," but it is not a true mathematical deconvolution.
+
+      ### How it Works:
+      It performs a convolution but in a way that maps a single input pixel to a larger output region. It learns a kernel that knows how to "fill in" a larger feature map from a smaller one.
+
+      ### Use Cases:
+      - **Image Segmentation**: To produce a high-resolution output map.
+      - **Generative Models (GANs)**: To generate an image from a low-dimensional vector.
+      - **Autoencoders**: In the decoder part, to reconstruct an image from a compressed representation.
+
+  - front: |
+      # What is **Parameter Sharing** in CNNs?
+    back: |
+      Parameter sharing is the key concept that makes CNNs efficient. It means that the **same filter (with the same set of weights)** is used across all positions of the input image.
+
+      ### Benefits:
+      1.  **Drastically Reduces Parameters**: The network only learns the weights for the filters, not for every pixel connection.
+      2.  **Enables Translational Invariance**: A feature (like a vertical edge) can be detected regardless of where it appears in the image, because the same feature detector is used everywhere.
+
+  - front: |
+      # What is the purpose of **1x1 Convolutions**?
+    back: |
+      A 1x1 convolution is a powerful technique where the filter size is `1x1`. Its primary use is to operate on the **channel dimension** of the feature map.
+
+      ### Use Cases:
+      1.  **Dimensionality Reduction**: It can reduce the number of channels (depth) of a feature map. This is much more computationally efficient than using pooling, which would also reduce spatial dimensions.
+      2.  **Adding Non-linearity**: It is often followed by a ReLU activation, allowing the network to learn more complex relationships between channels without altering the spatial dimensions. It is a core component of Inception networks.
+
+  - front: |
+      # Conceptual **CNN Code** in Keras/TensorFlow
+    back: |
+      This shows the typical structure of a simple CNN for image classification.
+
+      ```python
+      from tensorflow.keras import layers, models
+
+      # Define the model architecture
+      model = models.Sequential()
+
+      # Block 1: Conv -> ReLU -> Pool
+      model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)))
+      model.add(layers.MaxPooling2D((2, 2)))
+
+      # Block 2: Conv -> ReLU -> Pool
+      model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+      model.add(layers.MaxPooling2D((2, 2)))
+
+      # Flatten and add Dense layers for classification
+      model.add(layers.Flatten())
+      model.add(layers.Dense(64, activation='relu'))
+      model.add(layers.Dense(10, activation='softmax')) # Output layer for 10 classes
+
+      model.summary()
+      ```

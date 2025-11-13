@@ -1,0 +1,125 @@
+subject: Architectures
+description: Core architectures and dataflows for building modern recommender systems.
+cards:
+  - front: |
+      # **Collaborative Filtering** vs. **Content-Based Filtering**
+    back: |
+      These are the two foundational approaches to recommendation.
+
+      ## Collaborative Filtering (CF)
+      - **Core Idea**: "Users who liked similar items in the past will like similar items in the future." It uses the user-item interaction matrix to find patterns.
+      - **How it Works**: It recommends items based on the behavior of a collective group of users. It doesn't need to know anything about the items themselves.
+      - **Example**: Recommending you a movie because other users with a similar viewing history to yours also liked it.
+
+      ## Content-Based Filtering
+      - **Core Idea**: "If you liked this item, you will also like other items with similar attributes."
+      - **How it Works**: It recommends items by comparing their content or attributes (e.g., genre, director, author, product category).
+      - **Example**: Recommending you another sci-fi movie directed by Denis Villeneuve because you liked "Dune".
+
+  - front: |
+      # What is **User-User Collaborative Filtering**?
+    back: |
+      This is a classic CF technique that finds users who are similar to the target user and then recommends items that those similar users liked.
+
+      ### General Dataflow:
+      1.  **Find Similar Users**: For a target user `A`, iterate through all other users. Calculate a similarity score (e.g., using cosine similarity on their rating vectors) to find the top `N` most similar users.
+      2.  **Score Items**: Look at the items that these similar users have liked but user `A` has not yet seen.
+      3.  **Recommend**: The items with the highest scores, often weighted by the similarity of the users who liked them, are recommended to user `A`.
+
+  - front: |
+      # How are **"User-User embeddings"** created in classic CF?
+    back: |
+      In classic User-User Collaborative Filtering, "embeddings" aren't learned in the deep learning sense. Instead, a user's preference is represented by a **vector of their interactions** (e.g., ratings) with all items in the catalog.
+
+      ### The "Embedding" is the Interaction Vector:
+      - **User A's Vector**: `[5, 3, 0, 0, 5, ...]` (where 5 is a high rating, 3 is okay, 0 is no interaction).
+      - **User B's Vector**: `[4, 2, 0, 0, 5, ...]`
+
+      **Similarity** between these user vectors (the "embeddings") is then calculated using metrics like **Cosine Similarity** or **Pearson Correlation** to find a neighborhood of similar users.
+
+  - front: |
+      # What is **Matrix Factorization**?
+    back: |
+      Matrix Factorization is a more advanced collaborative filtering technique that uncovers **latent (hidden) factors** from the user-item interaction matrix.
+
+      ### Core Idea:
+      It decomposes the large, sparse user-item matrix into two smaller, dense matrices:
+      1.  A **User Matrix**, where each row is a vector (embedding) representing a user's preferences along the latent factors.
+      2.  An **Item Matrix**, where each column is a vector (embedding) representing an item's characteristics along those same latent factors.
+
+      The dot product of a user's embedding and an item's embedding approximates the original rating.
+
+  - front: |
+      # Dataflow of a **Matrix Factorization** Model
+    back: |
+      ### Training:
+      1.  Initialize the User and Item matrices with small random values.
+      2.  Iterate through the known ratings in the original interaction matrix.
+      3.  For each known rating, predict a rating by taking the **dot product** of the corresponding user's embedding and item's embedding.
+      4.  Calculate the error between the predicted and actual rating.
+      5.  Use an optimization algorithm (like Gradient Descent) to adjust the embeddings in the User and Item matrices to minimize this error.
+
+      ### Inference (Prediction):
+      To predict a rating for a user and an unseen item, you simply take the dot product of their learned embedding vectors.
+
+  - front: |
+      # What is a **Two-Tower Model**?
+    back: |
+      A Two-Tower Model is a common deep learning architecture for recommendation. It consists of two separate neural networks (towers) that learn to create high-quality embeddings.
+
+      1.  **The User Tower**: Takes various user features (e.g., watch history, demographics, country) as input and outputs a single **user embedding vector**.
+
+      2.  **The Item Tower**: Takes various item features (e.g., product category, text description, price) as input and outputs a single **item embedding vector**.
+
+      The goal is to train these towers so that the embeddings of users and the items they like are close together in the shared embedding space.
+
+  - front: |
+      # Dataflow of a **Two-Tower Model**
+    back: |
+      ### Training:
+      1.  For each training example, select a `(user, positive_item)` pair. Also select one or more `(negative_items)`.
+      2.  **User Tower**: Process the user's features to generate a user embedding `u`.
+      3.  **Item Tower**: Process the features of the positive item to get embedding `v⁺` and the negative items to get embeddings `v⁻`.
+      4.  **Calculate Scores**: Compute the cosine similarity or dot product between the user and the items: `score⁺ = u · v⁺` and `score⁻ = u · v⁻`.
+      5.  **Loss Function**: Use a loss function (like hinge loss or softmax loss) that **pushes the positive score `score⁺` up** and **pushes the negative scores `score⁻` down**.
+      6.  Use backpropagation to update the weights of both towers.
+
+      ### Inference:
+      The trained item tower is used to pre-compute and index embeddings for all items. When a user makes a request, their features are fed through the user tower to get a user embedding. An efficient search (like FAISS) is then used to find the item embeddings that are closest to this user embedding.
+
+  - front: |
+      # How are **User-Document Embeddings** created in a Two-Tower model?
+    back: |
+      In a Two-Tower model, embeddings are **learned** by the neural networks that make up the towers.
+
+      ### User Embedding Creation:
+      The user tower is a neural network (e.g., a multi-layer perceptron or MLP) that takes a rich set of features as input:
+      - **ID Features**: User ID.
+      - **Behavioral Features**: A list of recently watched video IDs, recently purchased product IDs.
+      - **Contextual Features**: Time of day, device type.
+      - **Demographic Features**: Country, language.
+
+      The tower learns how to combine these diverse inputs into a single, dense vector that represents the user's tastes and interests. The same process applies to the item/document tower using its respective features.
+
+  - front: |
+      # What is a **Retrieval and Reranking** architecture?
+    back: |
+      This is a multi-stage architecture used in large-scale production systems to balance speed and accuracy.
+
+      ### Stage 1: Retrieval (or "Candidate Generation")
+      - **Goal**: To quickly scan a massive catalog (millions or billions of items) and select a few hundred potentially relevant candidates. **Speed is the priority**.
+      - **Models Used**: Fast models like Two-Towers, Matrix Factorization, or Item-Item Collaborative Filtering are common.
+
+      ### Stage 2: Reranking (or "Scoring")
+      - **Goal**: To take the small set of candidates from the retrieval stage and precisely re-order them to produce the final, ranked list. **Accuracy is the priority**.
+      - **Models Used**: More complex and computationally expensive models that can use more features (e.g., Gradient Boosted Decision Trees, Deep & Cross Network).
+
+  - front: |
+      # Dataflow of a **Retrieval and Reranking** System
+    back: |
+      1.  **Request**: A user requests recommendations.
+      2.  **Retrieval**: The user's ID and context are sent to multiple candidate generators (e.g., a Two-Tower model, an "also-bought" model, a "trending items" model).
+      3.  **Candidate Pooling**: Each retriever returns a list of candidate items. These lists are combined, and duplicates are removed, resulting in a set of ~500 items.
+      4.  **Feature Fetching**: The system fetches a rich set of features for the user and all 500 candidate items.
+      5.  **Reranking**: The reranker model, which can use complex cross-features (e.g., interaction between user's country and item's price), scores each of the 500 candidates.
+      6.  **Final Ranking**: The items are sorted by their final score, and the top-K items are shown to the user.
