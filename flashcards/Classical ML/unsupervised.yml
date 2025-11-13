@@ -2,13 +2,6 @@ subject: Unsupervised Learning
 description: Core concepts for K-Means clustering and Principal Component Analysis (PCA).
 cards:
   - front: |
-      # What is **K-Means Clustering**?
-    back: |
-      K-Means is an unsupervised learning algorithm whose goal is to partition `n` data points into `K` distinct, non-overlapping subgroups (clusters).
-
-      It aims to create tight clusters where the data points within a cluster are as similar as possible, and data points in different clusters are as dissimilar as possible.
-
-  - front: |
       # What is the objective that K-Means tries to optimize?
     back: |
       The objective of K-Means is to minimize the **Within-Cluster Sum of Squares (WCSS)**, also known as **inertia**.

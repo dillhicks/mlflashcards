@@ -2,13 +2,6 @@ subject: Fine-Tuning
 description: Concepts and techniques for adapting Large Language Models to specific tasks and styles.
 cards:
   - front: |
-      # What is **Fine-Tuning** an LLM?
-    back: |
-      Fine-tuning is the process of taking a pre-trained Large Language Model and continuing its training on a smaller, task-specific dataset.
-
-      This process adjusts the model's internal weights to specialize its knowledge and behavior for a new, narrower domain or task, such as matching a specific writing style or performing a new function like code completion.
-
-  - front: |
       # **Why Fine-Tune** instead of just using Prompt Engineering or RAG?
     back: |
       Fine-tuning is used to teach a model a new **skill, style, or behavior**, which is fundamentally different from providing it with new knowledge.

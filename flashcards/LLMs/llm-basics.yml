@@ -3,13 +3,6 @@ description: Core concepts in Large Language Model architecture and transformers
 place: 1
 cards:
   - front: |
-      # What is the **Transformer architecture**?
-    back: |
-      A neural network architecture introduced in the paper *"Attention Is All You Need"* (2017) that has become the foundation for most state-of-the-art LLMs.
-
-      It relies on **self-attention mechanisms** instead of recurrence (like LSTMs or RNNs), allowing for more parallelization during training and better capturing of long-range dependencies in text.
-
-  - front: |
       # What are the main types of **Transformer architectures**?
     back: |
       There are three main types, each suited for different tasks:
