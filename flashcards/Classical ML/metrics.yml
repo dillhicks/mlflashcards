@@ -1,4 +1,5 @@
 subject: Metrics
+place: 2
 description: Key classification and regression metrics, their formulas, and their relationships.
 cards:
   - front: |

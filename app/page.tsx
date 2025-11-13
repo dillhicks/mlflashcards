@@ -72,13 +72,13 @@ export default function Home() {
           >
             Study All Flashcards
             <span className="ml-2 text-sm">
-              ({categories.reduce((total, cat) => total + cat.subjects.reduce((subTotal, sub) => subTotal + sub.cards.length, 0), 0)} cards)
+              ({categories.reduce((total, cat) => total + (cat.subjects?.reduce((subTotal, sub) => subTotal + (sub.cards?.length || 0), 0) || 0), 0)} cards)
             </span>
           </Link>
         </div>
 
         <div className="space-y-12">
-          {categories.map((category) => (
+          {categories.filter(cat => cat && cat.category)?.map((category) => (
             <div key={category.category}>
               <Link
                 href={`/study/category/${encodeURIComponent(category.category.toLowerCase().replace(/\s+/g, '-'))}`}
@@ -104,7 +104,7 @@ export default function Home() {
                     </div>
                     <div className="flex items-center space-x-3">
                       <span className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-                        {category.subjects.reduce((total, sub) => total + sub.cards.length, 0)} cards
+                        {category.subjects?.reduce((total, sub) => total + (sub.cards?.length || 0), 0) || 0} cards
                       </span>
                       <span className={`text-sm font-medium transition-colors ${
                         isDarkMode
@@ -116,12 +116,12 @@ export default function Home() {
                     </div>
                   </div>
                   <p className={`mt-1 text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-                    {category.subjects.length} subjects
+                    {category.subjects?.length || 0} subjects
                   </p>
                 </div>
               </Link>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {category.subjects.map((subject) => (
+                {category.subjects?.filter(subject => subject && subject.subject)?.map((subject) => (
                   <Link
                     key={subject.subject}
                     href={`/subject/${encodeURIComponent(subject.subject.toLowerCase().replace(/\s+/g, '-'))}`}
@@ -147,7 +147,7 @@ export default function Home() {
                         </p>
                         <div className="flex items-center justify-between">
                           <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                            {subject.cards.length} cards
+                            {subject.cards?.length || 0} cards
                           </span>
                           <span className={`font-medium ${
                             isDarkMode

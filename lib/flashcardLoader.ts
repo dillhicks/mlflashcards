@@ -6,11 +6,13 @@ export interface Flashcard {
 export interface Subject {
   subject: string;
   description: string;
+  place?: number;
   cards: Flashcard[];
 }
 
 export interface Category {
   category: string;
+  place?: number;
   subjects: Subject[];
 }
 

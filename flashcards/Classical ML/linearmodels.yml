@@ -1,4 +1,5 @@
 subject: Linear Models
+place: 3
 description: Core concepts of linear and logistic regression, regularization, and their underlying mechanics.
 cards:
   - front: |

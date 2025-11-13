@@ -1,4 +1,5 @@
 subject: Basics
+place: 1
 description: Core concepts of the Bias-Variance Tradeoff, common algorithms, and model performance.
 cards:
   - front: |

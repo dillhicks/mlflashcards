@@ -3,6 +3,52 @@ import { join } from 'path';
 import yaml from 'js-yaml';
 import { NextResponse } from 'next/server';
 
+function sortSubjects(subjects: Subject[]): Subject[] {
+  return subjects.sort((a, b) => {
+    // Items without place values go last
+    const aHasPlace = a.place !== undefined;
+    const bHasPlace = b.place !== undefined;
+
+    if (aHasPlace && bHasPlace) {
+      // Both have place values, sort by place (ascending)
+      return a.place - b.place;
+    }
+    if (aHasPlace && !bHasPlace) {
+      // A has place, B doesn't - A comes first
+      return -1;
+    }
+    if (!aHasPlace && bHasPlace) {
+      // A doesn't have place, B does - B comes first
+      return 1;
+    }
+    // Neither has place value, sort alphabetically
+    return a.subject.localeCompare(b.subject);
+  });
+}
+
+function sortCategories(categories: Category[]): Category[] {
+  return categories.sort((a, b) => {
+    // Items without place values go last
+    const aHasPlace = a.place !== undefined;
+    const bHasPlace = b.place !== undefined;
+
+    if (aHasPlace && bHasPlace) {
+      // Both have place values, sort by place (ascending)
+      return a.place - b.place;
+    }
+    if (aHasPlace && !bHasPlace) {
+      // A has place, B doesn't - A comes first
+      return -1;
+    }
+    if (!aHasPlace && bHasPlace) {
+      // A doesn't have place, B does - B comes first
+      return 1;
+    }
+    // Neither has place value, sort alphabetically
+    return a.category.localeCompare(b.category);
+  });
+}
+
 export interface Flashcard {
   front: string;
   back: string;
@@ -11,11 +57,17 @@ export interface Flashcard {
 export interface Subject {
   subject: string;
   description: string;
+  place?: number;
   cards: Flashcard[];
+}
+
+export interface CategoryMetadata {
+  place?: number;
 }
 
 export interface Category {
   category: string;
+  place?: number;
   subjects: Subject[];
 }
 
@@ -43,8 +95,17 @@ export async function GET(request: Request) {
         const filePath = join(flashcardsDir, file);
         const fileContent = readFileSync(filePath, 'utf8');
         const data = yaml.load(fileContent) as Subject;
-        subjects.push(data);
+
+        // Validate that the loaded data has required fields
+        if (data && data.subject && Array.isArray(data.cards)) {
+          subjects.push(data);
+        } else {
+          console.warn(`Invalid subject data in file: ${file}`);
+        }
       }
+
+      // Sort subjects by place, then alphabetically
+      sortSubjects(subjects);
 
       // If mode is 'all', return a combined subject with all flashcards
       if (mode === 'all') {
@@ -62,8 +123,20 @@ export async function GET(request: Request) {
     // Process each category folder
     for (const categoryDir of categoryDirs) {
       const categoryPath = join(flashcardsDir, categoryDir);
+
+      // Load metadata if it exists
+      let categoryPlace: number | undefined;
+      try {
+        const metadataPath = join(categoryPath, 'metadata.yml');
+        const metadataContent = readFileSync(metadataPath, 'utf8');
+        const metadata = yaml.load(metadataContent) as CategoryMetadata;
+        categoryPlace = metadata.place;
+      } catch (error) {
+        // metadata.yml doesn't exist, that's fine
+      }
+
       const files = readdirSync(categoryPath)
-        .filter(file => file.endsWith('.yml') || file.endsWith('.yaml'))
+        .filter(file => file.endsWith('.yml') || file.endsWith('.yaml') && file !== 'metadata.yml')
         .sort();
 
       const subjects: Subject[] = [];
@@ -71,16 +144,29 @@ export async function GET(request: Request) {
         const filePath = join(categoryPath, file);
         const fileContent = readFileSync(filePath, 'utf8');
         const data = yaml.load(fileContent) as Subject;
-        subjects.push(data);
+
+        // Validate that the loaded data has required fields
+        if (data && data.subject && Array.isArray(data.cards)) {
+          subjects.push(data);
+        } else {
+          console.warn(`Invalid subject data in file: ${file}`);
+        }
       }
+
+      // Sort subjects by place, then alphabetically
+      sortSubjects(subjects);
 
       if (subjects.length > 0) {
         categories.push({
           category: categoryDir,
+          place: categoryPlace,
           subjects: subjects
         });
       }
     }
+
+    // Sort categories by place, then alphabetically
+    sortCategories(categories);
 
     // Handle specific category request
     if (category) {

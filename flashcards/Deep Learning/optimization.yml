@@ -1,4 +1,5 @@
 subject: Optimization
+place: 2
 description: Core concepts of gradient descent, popular optimizers, and the impact of hyperparameters.
 cards:
   - front: |

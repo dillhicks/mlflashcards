@@ -1,5 +1,6 @@
-subject: LLM Architecture Basics
+subject: Basics
 description: Core concepts in Large Language Model architecture and transformers
+place: 1
 cards:
   - front: |
       # What is the **Transformer architecture**?
